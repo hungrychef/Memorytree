@@ -185,6 +185,15 @@
   .memyear{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
   .journeyrow{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--card)}
   @media(max-width:820px){.journeyrow{flex-wrap:wrap}}
+  .loginwrap.two-login{max-width:940px;display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:stretch;margin:30px auto}
+  .loginleft{min-width:0;display:flex;flex-direction:column}
+  .loginright{display:flex}
+  .treehero{flex:1;display:flex;flex-direction:column;background:radial-gradient(120% 90% at 50% 12%, #2c2519 0%, #141110 72%);border-radius:18px;padding:18px 18px 14px;box-shadow:var(--shadow)}
+  .treecanvas{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+  .treecanvas svg{width:100%;height:100%;display:block}
+  .treecap{text-align:center;color:#f4d99a;font-weight:800;letter-spacing:.06em;margin-top:10px;font-size:14px}
+  .treecap span{display:block;font-weight:500;color:#c9b48a;font-size:12px;letter-spacing:.02em;margin-top:5px;line-height:1.5}
+  @media(max-width:760px){.loginwrap.two-login{grid-template-columns:1fr}.loginright{display:none}}
   footer{color:var(--muted);font-size:12.5px;text-align:center;padding:26px 0 40px;line-height:1.8}
   .hidden{display:none!important}
   @media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.healthgrid{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
@@ -211,7 +220,7 @@
   <div id="tabbar"></div>
   <div id="view"></div>
 </div>
-<footer class="wrap">
+<footer class="wrap" id="sitefooter">
   Prototype v4 · Catch23 Innovation Challenge · Team 8 · Simulated AI — no data leaves this page, nothing is stored.<br>
   Design covenant: no streaks, no engagement tricks, aligned to the ICO Children's Code.<br>
   Accessibility: WCAG 2.2 AA target · text size, high contrast, easy-read spacing, read-aloud · the paper card is always available.<br>
@@ -385,6 +394,7 @@ function renderChrome(){
 /* ---------------- render router ---------------- */
 function render(){
   const el=document.getElementById('view');
+  const ft=document.getElementById('sitefooter');if(ft)ft.style.display=S.loggedIn?'':'none';
   if(!S.loggedIn){el.innerHTML=renderLogin();return;}
   if(S.role==='child'){el.innerHTML=S.view==='tree'?renderTree(cur()):S.view==='story'?renderStory(cur()):renderYP(cur());return;}
   if(S.view==='profile')el.innerHTML=renderProfile(DATA[S.profileId]);
@@ -394,26 +404,59 @@ function render(){
   else el.innerHTML=renderOverview();
 }
 
+/* ---------------- login hero tree ---------------- */
+function loginTreeSVG(){
+  const rng=seededRng('memorytree-login');const W=460,H=520,cx=230,cyTop=185,rx=178,ry=138,groundY=402;
+  let leaves='';for(let i=0;i<110;i++){const a=rng()*Math.PI*2,r=Math.sqrt(rng());
+    const lx=cx+Math.cos(a)*rx*r, ly=(cyTop-8)+Math.sin(a)*ry*r*0.95;const s=2.4+rng()*3.4;
+    leaves+=`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${s.toFixed(1)}" fill="url(#lgold)" opacity="${(0.55+rng()*0.45).toFixed(2)}"/>`;}
+  let blossoms='';for(let i=0;i<24;i++){const a=rng()*Math.PI*2,r=Math.sqrt(rng())*0.9;
+    const fx=cx+Math.cos(a)*rx*r, fy=(cyTop-8)+Math.sin(a)*ry*r*0.95;
+    blossoms+=`<g transform="translate(${fx.toFixed(1)},${fy.toFixed(1)})">${[0,72,144,216,288].map(d=>`<circle cx="${(Math.cos(d*Math.PI/180)*3.6).toFixed(1)}" cy="${(Math.sin(d*Math.PI/180)*3.6).toFixed(1)}" r="2.7" fill="#db4f3d"/>`).join('')}<circle r="2" fill="#ffdc78"/></g>`;}
+  let roots='';[-2,-1,0,1,2].forEach(sp=>{const ex=cx+sp*72;
+    roots+=`<path d="M${cx} ${groundY-6} Q ${cx+sp*22} ${groundY+26} ${ex} ${groundY+72}" fill="none" stroke="url(#lbark)" stroke-width="${(7-Math.abs(sp)*1.1).toFixed(1)}" stroke-linecap="round" opacity="0.92"/>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="display:block">
+    <defs>
+      <radialGradient id="lgold" cx="42%" cy="34%" r="72%"><stop offset="0%" stop-color="#fff2c0"/><stop offset="52%" stop-color="#f4c542"/><stop offset="100%" stop-color="#d69516"/></radialGradient>
+      <linearGradient id="lbark" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#caa159"/><stop offset="100%" stop-color="#6a4a24"/></linearGradient>
+      <radialGradient id="lglow" cx="50%" cy="30%" r="62%"><stop offset="0%" stop-color="#5a4a28" stop-opacity="0.85"/><stop offset="100%" stop-color="#141110" stop-opacity="0"/></radialGradient>
+    </defs>
+    <ellipse cx="${cx}" cy="${cyTop-6}" rx="${rx+26}" ry="${ry+26}" fill="url(#lglow)"/>
+    <path d="M${cx} ${groundY} L${cx} ${cyTop}" stroke="url(#lbark)" stroke-width="15" stroke-linecap="round" fill="none"/>
+    <path d="M${cx-6} ${cyTop+56} q -34 -26 -66 -44 M${cx+6} ${cyTop+40} q 36 -24 70 -36" stroke="url(#lbark)" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <rect x="${cx-13}" y="${cyTop+30}" width="26" height="${groundY-cyTop-30}" rx="9" fill="url(#lbark)"/>
+    ${leaves}${blossoms}
+    <ellipse cx="${cx}" cy="${groundY+94}" rx="122" ry="12" fill="#000" opacity="0.28"/>
+    ${roots}</svg>`;
+}
+
 /* ---------------- login ---------------- */
 function renderLogin(){
   const demos=[ACCOUNTS.find(a=>a.role==='master'),ACCOUNTS.find(a=>a.role==='counsellor'),ACCOUNTS.find(a=>a.role==='child')];
-  return `<div class="loginwrap">
-    <div class="logintop"><div class="lb">MySay <small>· Signal</small></div>
-      <p>Sign in with your account ID and date of birth.</p></div>
-    <div class="panel">
-      <div class="crisisline"><b>In crisis? 999 · Childline 0800 1111 · text SHOUT to 85258</b></div>
-      ${S.loginErr?`<div class="lerr">${esc(S.loginErr)}</div>`:''}
-      <div class="lfield"><label>Account ID</label><input id="lid" placeholder="e.g. 123" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <div class="lfield"><label>Date of birth (dd/mm/yyyy)</label><input id="ldob" placeholder="dd/mm/yyyy" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <button class="lbtn" onclick="doLogin()">Sign in</button>
-      <div class="quick"><div class="qh">Quick demo logins (full list is in the Excel sheet)</div>
-        ${demos.map(a=>`<button class="qcard" onclick="quickLogin('${a.id}')">
-          <div class="uavatar">${initials(a.name)}</div>
-          <div><div class="qn">${esc(a.name)}</div><div class="qm">Age ${a.age} · DOB ${a.dob} · ID ${a.id}</div></div>
-          <span class="qtag ${a.role==='child'?'child':a.role==='master'?'master':'staff'}">${a.role==='child'?'Young person':a.role==='master'?'Service Lead':'Counsellor'}</span></button>`).join('')}
+  return `<div class="loginwrap two-login">
+    <div class="loginleft">
+      <div class="logintop"><div class="lb">MySay <small>· Signal</small></div>
+        <p>Sign in with your account ID and date of birth.</p></div>
+      <div class="panel">
+        <div class="crisisline"><b>In crisis? 999 · Childline 0800 1111 · text SHOUT to 85258</b></div>
+        ${S.loginErr?`<div class="lerr">${esc(S.loginErr)}</div>`:''}
+        <div class="lfield"><label>Account ID</label><input id="lid" placeholder="e.g. 123" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <div class="lfield"><label>Date of birth (dd/mm/yyyy)</label><input id="ldob" placeholder="dd/mm/yyyy" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="lbtn" onclick="doLogin()">Sign in</button>
+        <div class="quick"><div class="qh">Quick demo logins (full list is in the Excel sheet)</div>
+          ${demos.map(a=>`<button class="qcard" onclick="quickLogin('${a.id}')">
+            <div class="uavatar">${initials(a.name)}</div>
+            <div><div class="qn">${esc(a.name)}</div><div class="qm">Age ${a.age} · DOB ${a.dob} · ID ${a.id}</div></div>
+            <span class="qtag ${a.role==='child'?'child':a.role==='master'?'master':'staff'}">${a.role==='child'?'Young person':a.role==='master'?'Service Lead':'Counsellor'}</span></button>`).join('')}
+        </div>
       </div>
     </div>
-    <p class="hint" style="text-align:center">Prototype login · dummy data only · nothing is stored.</p>
+    <div class="loginright">
+      <div class="treehero">
+        <div class="treecanvas">${loginTreeSVG()}</div>
+        <div class="treecap">THE MEMORY TREE<span>Reflections become leaves · achievements become flowers · the people in your corner become the roots</span></div>
+      </div>
+    </div>
   </div>`;
 }
 function doLogin(){login(document.getElementById('lid').value,document.getElementById('ldob').value);}
