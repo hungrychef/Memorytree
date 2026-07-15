@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MySay · Signal — v4</title>
+<style>
+  :root{
+    --brand:#0f5f66; --brand-2:#13808a; --bg:#e9f2f1; --card:#ffffff;
+    --ink:#16272a; --muted:#5e7377; --line:#d8e6e4; --line-2:#c3d7d3;
+    --green:#2f8f6b; --green-soft:#e1f2ea; --amber:#cf9526; --amber-soft:#fbf1d9;
+    --red:#d5493f; --red-soft:#fbe3e0; --accent:#e0715a; --accent-soft:#fbe6e0;
+    --shadow:0 1px 3px rgba(15,95,102,.08),0 8px 22px rgba(15,95,102,.06);
+    --r:14px; --fs:16px; --lh:1.5; --ls:0;
+  }
+  *{box-sizing:border-box}
+  html{font-size:var(--fs)}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:var(--lh);letter-spacing:var(--ls)}
+  body.easy-read{--lh:1.8;--ls:.02em}
+  body.contrast{--bg:#fff;--card:#fff;--ink:#000;--muted:#333;--line:#000;--line-2:#000;--brand:#063b40}
+  h1,h2,h3{margin:0} button{font-family:inherit;cursor:pointer}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+  header{background:linear-gradient(120deg,var(--brand),var(--brand-2));color:#eafbfa;padding:20px 0}
+  .hrow{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+  .brand{font-family:Georgia,serif;font-size:32px;font-weight:700;letter-spacing:-.5px}
+  .brand small{font-style:italic;font-weight:400;font-size:18px;opacity:.85;margin-left:6px}
+  .tagline{opacity:.82;font-size:14px;margin-top:2px}
+  .userbox{display:flex;align-items:center;gap:12px;font-size:14px}
+  .uavatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-weight:800}
+  .uname{font-weight:700}.urole{opacity:.8;font-size:12.5px}
+  .logout{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#eafbfa;border-radius:999px;padding:7px 15px;font-weight:600;font-size:13px}
+  .logout:hover{background:rgba(255,255,255,.24)}
+  .toolbar{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:12px 14px;margin:18px 0;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .tlabel{font-size:13px;color:var(--muted);font-weight:600;margin-right:2px}
+  .pill{background:var(--card);border:1.5px solid var(--line-2);border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:600;color:var(--brand)}
+  .pill:hover{border-color:var(--brand)} .pill.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .tabs{display:flex;gap:12px;margin:16px 0;flex-wrap:wrap}
+  .tab{flex:1;min-width:220px;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:14px 18px;box-shadow:var(--shadow)}
+  .tab h3{font-size:16px}.tab p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
+  .tab.on{background:var(--brand);border-color:var(--brand)}.tab.on h3,.tab.on p{color:#eafbfa}.tab.on p{opacity:.85}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px 22px;margin-bottom:16px}
+  .panel h2{font-size:19px;font-family:Georgia,serif}.panel h2.plain{font-family:inherit;font-size:17px}
+  .sub{color:var(--muted);font-size:13.5px;margin-top:2px}
+  .grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start}
+  .row{display:flex;gap:10px;flex-wrap:wrap}.hint{color:var(--muted);font-size:13px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  /* login */
+  .loginwrap{max-width:460px;margin:40px auto}
+  .logintop{text-align:center;margin-bottom:18px}
+  .logintop .lb{font-family:Georgia,serif;font-size:30px;color:var(--brand);font-weight:700}
+  .logintop .lb small{font-style:italic;font-weight:400;opacity:.8}
+  .logintop p{color:var(--muted);font-size:14px;margin:6px 0 0}
+  .lfield{margin-bottom:14px}
+  .lfield label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px}
+  .lfield input{width:100%;border:1.5px solid var(--line-2);border-radius:10px;padding:12px 14px;font-size:15px;background:#fff;color:var(--ink)}
+  .lfield input:focus{outline:none;border-color:var(--brand)}
+  .lbtn{width:100%;background:var(--brand);color:#fff;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:15px;margin-top:4px}
+  .lbtn:hover{background:var(--brand-2)}
+  .lerr{background:var(--accent-soft);color:#a23a26;border:1px solid #f2cfc6;border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:12px}
+  .quick{margin-top:18px;border-top:1px dashed var(--line-2);padding-top:16px}
+  .quick .qh{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:10px}
+  .qcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1.5px solid var(--line);background:#f7fbfa;border-radius:12px;padding:11px 13px;margin-bottom:9px}
+  .qcard:hover{border-color:var(--brand)}
+  .qcard .uavatar{background:var(--brand);color:#fff;border:none}
+  .qcard .qn{font-weight:700;font-size:14.5px}.qcard .qm{font-size:12px;color:var(--muted)}
+  .qtag{margin-left:auto;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:999px}
+  .qtag.child{background:var(--green-soft);color:var(--green)}.qtag.staff{background:#e6eef7;color:#2f5f9e}.qtag.master{background:#efe6f7;color:#6a3d9e}
+  /* chat */
+  .chat{display:flex;flex-direction:column;min-height:420px}
+  .statusbar{background:var(--amber-soft);border:1px solid #ecdcbf;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;color:#8a6a1e;margin-bottom:12px}
+  .msgs{flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:360px;padding-right:4px}
+  .bubble{max-width:80%;padding:11px 14px;border-radius:14px;font-size:14.5px}
+  .bot{background:#eef5f4;color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px}
+  .me{background:var(--brand);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .bubble .t{display:block;font-size:11px;opacity:.6;margin-top:4px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .chip{border:1.5px solid var(--line-2);background:#fff;border-radius:999px;padding:7px 13px;font-size:13px;color:var(--brand);font-weight:600}
+  .chip:hover{border-color:var(--brand)} .chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .composer{display:flex;gap:10px;margin-top:12px;align-items:center}
+  .composer input{flex:1;border:1.5px solid var(--line-2);border-radius:999px;padding:12px 16px;font-size:14.5px;background:#fff;color:var(--ink)}
+  .mic{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line-2);font-size:17px;background:#eef5f4}
+  .send{background:var(--brand);color:#fff;border:none;border-radius:999px;padding:12px 20px;font-weight:700}
+  .moods{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .mood{border:1.5px solid var(--line);background:#f7fbfa;border-radius:12px;padding:10px 4px;text-align:center;font-size:12.5px;font-weight:600}
+  .mood .e{font-size:26px;display:block;margin-bottom:2px}
+  .mood.sel{border-color:var(--brand);background:#e7f3f2}
+  .fieldlabel{font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:12px 0 4px}
+  .field{border:1.5px solid var(--line-2);border-radius:10px;background:#fff;padding:10px 12px;min-height:42px;font-size:14px}
+  .field.empty{color:#a9bab7}
+  .loglist .logitem{border-top:1px solid var(--line);padding:9px 0;font-size:13.5px}
+  .loglist .logitem:first-child{border-top:none}
+  .logitem b{color:var(--brand)}.logitem .t{color:var(--muted);font-size:11.5px}.logitem.crisis b{color:var(--accent)}
+  .cta{background:var(--brand);color:#fff;border:none;border-radius:999px;padding:12px 24px;font-weight:700;font-size:15px}
+  .cta.green{background:var(--green)}
+  /* story */
+  .storyhead{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#eafbfa;border-radius:var(--r);padding:22px 24px;margin-bottom:16px}
+  .storyhead h2{font-family:Georgia,serif;font-size:23px;color:#fff}
+  .storyhead p{opacity:.88;font-size:14px;margin:6px 0 0;max-width:680px}
+  .covenant{display:inline-block;margin-top:12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 14px;font-size:12.5px}
+  .loop{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:#f7fbfa}
+  .loop .lworry{font-weight:700;font-size:15px}
+  .steps{display:flex;gap:0;margin:12px 0 6px;flex-wrap:wrap}
+  .step{flex:1;min-width:140px;padding:0 6px}
+  .step .dot{width:16px;height:16px;border-radius:50%;background:var(--line-2);border:3px solid var(--card);margin-bottom:6px}
+  .step.done .dot{background:var(--green)}.step.active .dot{background:var(--amber)}
+  .step .stitle{font-weight:700;font-size:13px}.step .sdesc{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .steptrack{height:3px;background:var(--line);border-radius:2px;margin:0 6px 10px}.steptrack .fill{height:3px;background:var(--green);border-radius:2px}
+  .resptime{display:inline-block;background:var(--green-soft);color:var(--green);border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:700;margin-top:6px}
+  .resptime.open{background:var(--amber-soft);color:var(--amber)}
+  .tl{position:relative;margin-left:8px;padding-left:22px;border-left:2px solid var(--line-2)}
+  .tlweek{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+  .tlitem{position:relative;padding:8px 0 8px 6px}
+  .tlitem::before{content:"";position:absolute;left:-29px;top:12px;width:11px;height:11px;border-radius:50%;background:var(--brand);border:2px solid var(--card)}
+  .tlitem.win::before{background:var(--green)}.tlitem.worry::before{background:var(--amber)}.tlitem.moodm::before{background:var(--accent)}
+  .tlitem .txt{font-size:14px}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 8px;border-radius:999px;margin-right:6px;vertical-align:1px}
+  .tag.win{background:var(--green-soft);color:var(--green)}.tag.worry{background:var(--amber-soft);color:var(--amber)}
+  .tag.mood{background:var(--accent-soft);color:#b6503b}.tag.note{background:#e9efee;color:var(--muted)}
+  /* counsellor */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);border-top:4px solid var(--line-2)}
+  .kpi .big{font-size:26px;font-weight:800;color:var(--brand)}.kpi .lab{font-size:12px;color:var(--muted);margin-top:3px}
+  .kpi.red{border-top-color:var(--red)}.kpi.red .big{color:var(--red)}
+  .kpi.yellow{border-top-color:var(--amber)}.kpi.yellow .big{color:var(--amber)}
+  .kpi.green{border-top-color:var(--green)}.kpi.green .big{color:var(--green)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:13px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .sw.red{background:var(--red)}.sw.yellow{background:var(--amber)}.sw.green{background:var(--green)}
+  .urgent{border:1px solid var(--red-soft);border-left:5px solid var(--red);background:#fdf4f3;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+  .urgent .un{font-weight:800;font-size:15px}.urgent .ur{font-size:13px;color:#8a3228;margin-top:2px}
+  .urgent .uact{font-size:12.5px;font-weight:700;color:var(--red);margin-top:8px;display:inline-block}
+  .healthgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .hcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);border-top:4px solid var(--line-2)}
+  .hcard.red{border-top-color:var(--red)}.hcard.yellow{border-top-color:var(--amber)}.hcard.green{border-top-color:var(--green)}
+  .hcard .khead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .avatar{width:40px;height:40px;border-radius:50%;background:#dfecea;color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+  .kname{font-weight:800;font-size:15px}.kmeta{font-size:11.5px;color:var(--muted)}
+  .badge{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:999px}
+  .badge.red{background:var(--red-soft);color:var(--red)}.badge.yellow{background:var(--amber-soft);color:var(--amber)}.badge.green{background:var(--green-soft);color:var(--green)}
+  .curmood{font-size:12.5px;font-weight:600;margin:6px 0}
+  .hrow2{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;border-top:1px solid var(--line);padding:7px 0}
+  .hrow2 .k{color:var(--muted)}.hrow2 .v{font-weight:700;text-align:right}
+  .staffbar{background:var(--brand);color:#eafbfa;border-radius:var(--r);padding:16px 20px;margin-bottom:16px;font-size:14px;line-height:1.7}
+  .staffbar b{color:#fff}
+  .metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .metric{border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;background:#f7fbfa}
+  .metric .big{font-size:24px;font-weight:800;color:var(--brand)}.metric .lab{font-size:12px;color:var(--muted);margin-top:3px}
+  .metric .tr{font-size:11.5px;color:var(--green);font-weight:700;margin-top:4px}
+  .filterbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .bars{display:flex;gap:3px;align-items:flex-end;height:34px;margin:6px 0 10px}
+  .bars span{flex:1;border-radius:2px 2px 0 0;min-height:4px}
+  .appcard{background:#f7fbfa;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12.5px;margin:8px 0}
+  .esc{font-size:12.5px;color:var(--brand);font-weight:600;margin-top:6px}
+  .flagline{font-size:12px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:6px}
+  .fdot{width:9px;height:9px;border-radius:50%;background:var(--amber)}.fdot.ok{background:var(--green)}.fdot.red{background:var(--red)}
+  .themeswitch{display:inline-flex;align-items:center;gap:7px;margin-left:auto;padding-left:12px}
+  .themeswitch .tl2{font-size:13px;color:var(--muted);font-weight:600}
+  .swatch{width:24px;height:24px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--line-2);cursor:pointer;padding:0}
+  .swatch.on{box-shadow:0 0 0 2px var(--brand);transform:scale(1.12)}
+  .clickable{cursor:pointer;transition:box-shadow .12s,border-color .12s,transform .12s}
+  .clickable:hover{border-color:var(--brand);box-shadow:0 4px 14px rgba(15,95,102,.14);transform:translateY(-1px)}
+  .viewlink{margin-top:10px;font-size:12px;font-weight:700;color:var(--brand)}
+  .backbtn{background:var(--card);border:1.5px solid var(--line-2);color:var(--brand);border-radius:999px;padding:9px 16px;font-weight:700;font-size:13.5px;margin-bottom:14px}
+  .backbtn:hover{border-color:var(--brand)}
+  .mtree{background:linear-gradient(180deg,#eef7ee,#f8fbf6);border:1px solid var(--line);border-radius:12px;padding:8px}
+  .badges{display:flex;flex-wrap:wrap;gap:8px}
+  .mbadge{background:var(--accent-soft);color:#b6503b;border:1px solid #eecfc6;border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:700}
+  .chap{margin:10px 0}
+  .chap .cl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+  .cbar{height:9px;background:var(--line);border-radius:6px;overflow:hidden}
+  .cbar .cf{height:9px;background:var(--brand);border-radius:6px}
+  .riverleg{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;margin-top:8px}
+  .riverleg span{display:inline-flex;align-items:center;gap:6px}
+  .progpill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800}
+  .progpill.improved{background:var(--green-soft);color:var(--green)}
+  .progpill.declined{background:var(--red-soft);color:var(--red)}
+  .progpill.steady{background:var(--amber-soft);color:var(--amber)}
+  .memlist .memitem{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+  .memlist .memitem:first-child{border-top:none}
+  .memicon{flex:0 0 28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .memicon.leaf{background:var(--green-soft)}.memicon.flower{background:var(--accent-soft)}.memicon.note{background:#e9efee}
+  .memyear{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+  .journeyrow{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--card)}
+  @media(max-width:820px){.journeyrow{flex-wrap:wrap}}
+  footer{color:var(--muted);font-size:12.5px;text-align:center;padding:26px 0 40px;line-height:1.8}
+  .hidden{display:none!important}
+  @media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.healthgrid{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
+  @media(max-width:820px){.grid2,.healthgrid,.metrics{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap hrow">
+    <div><div class="brand">MySay <small>· Signal</small></div>
+      <div class="tagline">A consented, continuous voice into every decision — v4</div></div>
+    <div id="userbox"></div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="toolbar" id="toolbar">
+    <span class="tlabel">Make it yours:</span>
+    <button class="pill" onclick="cycleText()">Aa text size</button>
+    <button class="pill" id="p-contrast" onclick="toggleClass('contrast','p-contrast')">High contrast</button>
+    <button class="pill" id="p-easy" onclick="toggleClass('easy-read','p-easy')">Easy-read spacing</button>
+    <button class="pill" id="p-read" onclick="readAloud(this)">Read aloud</button>
+    <span id="themebox"></span>
+  </div>
+  <div id="tabbar"></div>
+  <div id="view"></div>
+</div>
+<footer class="wrap">
+  Prototype v4 · Catch23 Innovation Challenge · Team 8 · Simulated AI — no data leaves this page, nothing is stored.<br>
+  Design covenant: no streaks, no engagement tricks, aligned to the ICO Children's Code.<br>
+  Accessibility: WCAG 2.2 AA target · text size, high contrast, easy-read spacing, read-aloud · the paper card is always available.<br>
+  In crisis? 999 · Childline 0800 1111 · text SHOUT to 85258.
+</footer>
+
+<script>
+const COUNSELLORS=[{"id": "789", "name": "Shivani", "age": 23, "dob": "18/03/2003"}, {"id": "790", "name": "Rahul Deshmukh", "age": 31, "dob": "09/05/1995"}, {"id": "791", "name": "Pooja Nair", "age": 28, "dob": "22/11/1997"}, {"id": "792", "name": "Vikram Singh", "age": 35, "dob": "03/02/1991"}, {"id": "793", "name": "Anjali Mehta", "age": 41, "dob": "27/06/1985"}];
+const STUDENTS=[{"id": "123", "name": "Gaurav", "age": 16, "dob": "14/01/2010", "rag": "green", "counsellorId": "789", "person": "My coach", "review": "14 Aug", "approved": true, "moods": [2, 2, 3, 3, 4, 4], "worries": [{"worry": "Being moved to a new placement", "raised": "6 weeks ago", "status": "outcome", "outcome": "Raised in my card and read out first. The panel agreed a plan with me, not without me.", "days": 9}, {"worry": "Wanting a say in staying at my school", "raised": "2 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}, {"worry": "Not knowing who'll be in the room", "raised": "1 week ago", "status": "raised", "outcome": null, "days": null}], "card": {"okay": ["Football team took me on", "Getting on with my carer", "Tutoring twice a week helps"], "worry": "Being moved again", "decision": "Staying at my school"}, "note": "Card ready for my review on 14 Aug. My words, read out first."}, {"id": "567", "name": "Shivam Sahu", "age": 18, "dob": "16/02/2008", "rag": "red", "counsellorId": "789", "person": "My mentor", "review": "Transition plan · 28 Aug", "approved": true, "moods": [3, 2, 2, 1, 2, 1], "worries": [{"worry": "Managing money and bills on my own", "raised": "5 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}, {"worry": "Losing my keyworker at 18 — who do I call?", "raised": "3 weeks ago", "status": "raised", "outcome": null, "days": null}, {"worry": "Feeling low, not wanting to be around people", "raised": "2 weeks ago", "status": "raised", "outcome": null, "days": null}], "card": {"okay": ["College taster went okay", "New flat is sorted", "Still going to the gym"], "worry": "Losing my support when I turn 18", "decision": "Who my point of contact is after 18"}, "note": "Turning 18 in a few weeks. Everything's changing at once."}, {"id": "617", "name": "Aarav Mehta", "age": 16, "dob": "01/05/2010", "rag": "yellow", "counsellorId": "789", "person": "My mentor", "review": "11 Sep", "approved": true, "moods": [2, 2, 3, 2, 3, 2], "worries": [{"worry": "Staying at my school", "raised": "4 weeks ago", "status": "raised", "outcome": null, "days": null}], "card": {"okay": ["Back playing cricket", "Keeping up with school", "College taster went okay"], "worry": "Staying at my school", "decision": "Keeping contact with my sibling"}, "note": "Bit of a mixed one."}, {"id": "303", "name": "Diya Kapoor", "age": 18, "dob": "21/06/2008", "rag": "yellow", "counsellorId": "789", "person": "My brother / sister", "review": "Transition plan · 28 Aug", "approved": true, "moods": [2, 3, 2, 3, 3, 2], "worries": [{"worry": "Staying at my school", "raised": "2 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}, {"worry": "Being moved again", "raised": "6 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}], "card": {"okay": ["Tutoring twice a week helps", "Getting on with my carer", "New flat is sorted"], "worry": "Staying at my school", "decision": "Keeping contact with my sibling"}, "note": "Okay-ish week."}, {"id": "529", "name": "Kabir Singh", "age": 18, "dob": "15/02/2008", "rag": "green", "counsellorId": "791", "person": "My keyworker", "review": "14 Aug", "approved": true, "moods": [3, 3, 4, 4, 3, 4], "worries": [{"worry": "Contact with my sibling", "raised": "2 weeks ago", "status": "outcome", "outcome": "Raised in my card and read out first. The panel agreed a plan with me, not without me.", "days": 8}], "card": {"okay": ["Back playing cricket", "Football team took me on", "Tutoring twice a week helps"], "worry": "Contact with my sibling", "decision": "Keeping contact with my sibling"}, "note": "Good week — kept busy."}, {"id": "384", "name": "Ananya Rao", "age": 18, "dob": "25/01/2008", "rag": "yellow", "counsellorId": "792", "person": "A teacher I trust", "review": "11 Sep", "approved": true, "moods": [3, 3, 2, 3, 2, 3], "worries": [{"worry": "Contact with my sibling", "raised": "5 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}, {"worry": "Being moved again", "raised": "1 week ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}], "card": {"okay": ["Keeping up with school", "College taster went okay", "Back playing cricket"], "worry": "Contact with my sibling", "decision": "Who my point of contact is after 18"}, "note": "Bit of a mixed one."}, {"id": "532", "name": "Rohan Verma", "age": 16, "dob": "09/03/2010", "rag": "yellow", "counsellorId": "793", "person": "My coach", "review": "11 Sep", "approved": true, "moods": [3, 2, 2, 3, 2, 3], "worries": [{"worry": "Exam stress building up", "raised": "5 weeks ago", "status": "raised", "outcome": null, "days": null}, {"worry": "Not knowing who'll be in the room", "raised": "5 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}], "card": {"okay": ["Back playing cricket", "Keeping up with school", "Football team took me on"], "worry": "Exam stress building up", "decision": "Where I live next"}, "note": "Okay-ish week."}, {"id": "320", "name": "Isha Nair", "age": 16, "dob": "04/03/2010", "rag": "yellow", "counsellorId": "789", "person": "My brother / sister", "review": "14 Aug", "approved": true, "moods": [3, 3, 2, 3, 2, 3], "worries": [{"worry": "Getting on with my carer", "raised": "4 weeks ago", "status": "raised", "outcome": null, "days": null}, {"worry": "Being moved again", "raised": "5 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}], "card": {"okay": ["Reading more lately", "Tutoring twice a week helps", "New flat is sorted"], "worry": "Getting on with my carer", "decision": "Keeping contact with my sibling"}, "note": "Okay-ish week."}, {"id": "489", "name": "Vihaan Gupta", "age": 16, "dob": "12/01/2010", "rag": "yellow", "counsellorId": "790", "person": "My coach", "review": "Transition plan · 28 Aug", "approved": true, "moods": [2, 3, 2, 3, 3, 2], "worries": [{"worry": "Settling into a new placement", "raised": "3 weeks ago", "status": "raised", "outcome": null, "days": null}, {"worry": "Not knowing who'll be in the room", "raised": "2 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}], "card": {"okay": ["Reading more lately", "Cooking for myself now", "Joined the gym"], "worry": "Settling into a new placement", "decision": "Where I live next"}, "note": "Bit of a mixed one."}, {"id": "370", "name": "Meera Iyer", "age": 17, "dob": "24/01/2009", "rag": "yellow", "counsellorId": "791", "person": "My mentor", "review": "11 Sep", "approved": true, "moods": [3, 3, 2, 3, 2, 3], "worries": [{"worry": "Contact with my sibling", "raised": "2 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}, {"worry": "Being moved again", "raised": "5 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}], "card": {"okay": ["Joined the gym", "Tutoring twice a week helps", "Made a mate at school"], "worry": "Contact with my sibling", "decision": "Staying at my school"}, "note": "Bit of a mixed one."}, {"id": "649", "name": "Arjun Reddy", "age": 17, "dob": "13/01/2009", "rag": "red", "counsellorId": "792", "person": "My keyworker", "review": "21 Aug", "approved": true, "moods": [3, 2, 2, 1, 2, 1], "worries": [{"worry": "Some nights I don't want to be around anyone", "raised": "1 week ago", "status": "raised", "outcome": null, "days": null}, {"worry": "Settling into a new placement", "raised": "6 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}, {"worry": "Staying at my school", "raised": "6 weeks ago", "status": "raised", "outcome": null, "days": null}], "card": {"okay": ["Football team took me on", "Made a mate at school", "Tutoring twice a week helps"], "worry": "Some nights I don't want to be around anyone", "decision": "Where I live next"}, "note": "A lot feels heavy this week."}, {"id": "665", "name": "Priya Sharma", "age": 16, "dob": "27/03/2010", "rag": "red", "counsellorId": "793", "person": "A teacher I trust", "review": "11 Sep", "approved": true, "moods": [3, 3, 2, 2, 1, 1], "worries": [{"worry": "Losing my keyworker at 18 — who do I call?", "raised": "2 weeks ago", "status": "raised", "outcome": null, "days": null}, {"worry": "Exam stress building up", "raised": "3 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}, {"worry": "Staying at my school", "raised": "3 weeks ago", "status": "raised", "outcome": null, "days": null}], "card": {"okay": ["Cooking for myself now", "Joined the gym", "Tutoring twice a week helps"], "worry": "Losing my keyworker at 18 — who do I call?", "decision": "Staying at my school"}, "note": "Everything's changing at once."}, {"id": "470", "name": "Aditya Bose", "age": 18, "dob": "07/05/2008", "rag": "yellow", "counsellorId": "789", "person": "My brother / sister", "review": "28 Aug", "approved": true, "moods": [2, 2, 3, 2, 3, 2], "worries": [{"worry": "Getting on with my carer", "raised": "1 week ago", "status": "raised", "outcome": null, "days": null}, {"worry": "Settling into a new placement", "raised": "1 week ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}], "card": {"okay": ["New flat is sorted", "Tutoring twice a week helps", "Football team took me on"], "worry": "Getting on with my carer", "decision": "Which college I go to"}, "note": "Bit of a mixed one."}, {"id": "146", "name": "Sneha Das", "age": 16, "dob": "08/06/2010", "rag": "yellow", "counsellorId": "790", "person": "A teacher I trust", "review": "14 Aug", "approved": true, "moods": [2, 3, 2, 3, 3, 2], "worries": [{"worry": "Exam stress building up", "raised": "3 weeks ago", "status": "raised", "outcome": null, "days": null}, {"worry": "Contact with my sibling", "raised": "5 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}], "card": {"okay": ["College taster went okay", "Art class is good", "Joined the gym"], "worry": "Exam stress building up", "decision": "Staying at my school"}, "note": "Okay-ish week."}, {"id": "181", "name": "Karan Malhotra", "age": 17, "dob": "28/02/2009", "rag": "green", "counsellorId": "791", "person": "My keyworker", "review": "14 Aug", "approved": true, "moods": [3, 3, 4, 4, 3, 4], "worries": [{"worry": "Getting on with my carer", "raised": "6 weeks ago", "status": "outcome", "outcome": "Raised in my card and read out first. The panel agreed a plan with me, not without me.", "days": 6}], "card": {"okay": ["Joined the gym", "Getting on with my carer", "Cooking for myself now"], "worry": "Getting on with my carer", "decision": "Which college I go to"}, "note": "Feeling alright, things are steadier."}, {"id": "564", "name": "Riya Chauhan", "age": 16, "dob": "27/06/2010", "rag": "yellow", "counsellorId": "792", "person": "My mentor", "review": "4 Sep", "approved": true, "moods": [2, 3, 2, 3, 3, 2], "worries": [{"worry": "Contact with my sibling", "raised": "6 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}, {"worry": "Not knowing who'll be in the room", "raised": "3 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}], "card": {"okay": ["College taster went okay", "Cooking for myself now", "Back playing cricket"], "worry": "Contact with my sibling", "decision": "Keeping contact with my sibling"}, "note": "Bit of a mixed one."}, {"id": "266", "name": "Dev Patel", "age": 17, "dob": "12/03/2009", "rag": "red", "counsellorId": "793", "person": "My brother / sister", "review": "21 Aug", "approved": true, "moods": [3, 3, 2, 2, 1, 1], "worries": [{"worry": "Some nights I don't want to be around anyone", "raised": "2 weeks ago", "status": "raised", "outcome": null, "days": null}, {"worry": "Settling into a new placement", "raised": "2 weeks ago", "status": "discussed", "outcome": "On the agenda for the next meeting — the IRO has it in writing beforehand.", "days": null}, {"worry": "Being moved again", "raised": "1 week ago", "status": "raised", "outcome": null, "days": null}], "card": {"okay": ["Made a mate at school", "Football team took me on", "New flat is sorted"], "worry": "Some nights I don't want to be around anyone", "decision": "Where I live next"}, "note": "Not been a great week honestly."}, {"id": "373", "name": "Tara Joshi", "age": 16, "dob": "22/06/2010", "rag": "green", "counsellorId": "789", "person": "My keyworker", "review": "Transition plan · 28 Aug", "approved": true, "moods": [3, 3, 4, 4, 3, 4], "worries": [{"worry": "Being moved again", "raised": "5 weeks ago", "status": "outcome", "outcome": "Raised in my card and read out first. The panel agreed a plan with me, not without me.", "days": 6}], "card": {"okay": ["Reading more lately", "Tutoring twice a week helps", "Joined the gym"], "worry": "Being moved again", "decision": "Which college I go to"}, "note": "Decent week. Card's ready for my review."}];
+</script>
+
+<script>
+/* ---------------- build accounts + data ---------------- */
+const PEOPLE=['My coach','My mentor','A teacher I trust','My brother / sister','My keyworker'];
+const MOODNAME={4:'good',3:'okay',2:'low',1:'bad'};
+const MOODEMO={good:'😄',okay:'🙂',low:'😐',bad:'😞'};
+const WL=['6 weeks ago','5 weeks ago','4 weeks ago','3 weeks ago','2 weeks ago','1 week ago'];
+let DATA={}, ACCOUNTS=[], S={};
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+/* ---------------- memory tree / long-term journey ---------------- */
+const LEAF_TXT=["Voice note after football","Reflected on a hard day","Shared how my week went","Talked about my carer","A quiet check-in","Note about school","Recorded how I felt tonight","Said what I was proud of","Talked through a worry","Just needed to say it out loud","Wrote about missing my sibling","A good morning, for once"];
+const FLOWER_TXT=["Finished the school term","Made a new friend","Asked for help for the first time","Stayed calm in a tough moment","Joined the football team","Passed my mocks","Cooked my first meal","Spoke up in my review","Got back into cricket","Kept a promise to myself"];
+const BADGES_ALL=["Finding My Voice","Building Confidence","School Success","I Asked For Help","Stayed Calm","Shared My Feelings","First Voice Note","Opened Up","Reached Out","Kept Going"];
+const CHAPTERS=["Finding My Voice","Building Confidence","School Success","Looking Ahead"];
+function seededRng(seedStr){let s=0;for(const ch of seedStr)s=(s*31+ch.charCodeAt(0))&0x7fffffff;return function(){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;};}
+function monthLabels(n){const out=[];for(let i=n-1;i>=0;i--){const d=new Date(2026,6-i,1);out.push(d.toLocaleString('en',{month:'short'})+" '"+String(d.getFullYear()).slice(2));}return out;}
+function bandOf(v){return v>=3.1?'green':v>=2.1?'yellow':'red';}
+function buildMemory(s){
+  const rng=seededRng(s.id);const N=16;const labels=monthLabels(N);
+  const months=[];for(let i=0;i<N;i++){const t=i/(N-1);let base;
+    if(s.rag==='green')base=2.0+t*1.7;
+    else if(s.rag==='red')base=3.0-t*1.5+(i>N-4?-0.2:0);
+    else base=2.5+Math.sin(i*1.05+1)*0.5;
+    let v=base+(rng()-0.5)*0.5;v=Math.max(1,Math.min(4,v));months.push({label:labels[i],v:+v.toFixed(2)});}
+  // memories spread across months, weighted to recent
+  const count=s.rag==='green'?14:s.rag==='yellow'?12:10;
+  const mems=[];
+  for(let k=0;k<count;k++){const mi=Math.min(N-1,Math.floor(Math.pow(rng(),0.6)*N));
+    const r=rng();const type=r<0.6?'leaf':r<0.85?'flower':'note';
+    const pool=type==='flower'?FLOWER_TXT:LEAF_TXT;const txt=pool[Math.floor(rng()*pool.length)];
+    mems.push({month:labels[mi],mi,type,text:txt,emotion:bandOf(months[mi].v)});}
+  mems.sort((a,b)=>b.mi-a.mi);
+  // roots = supportive adults
+  const rootPool=[s.person,'A teacher I trust','My keyworker','My carer'];const roots=[...new Set(rootPool)].slice(0,4);
+  // badges + chapters by progression
+  const earned=s.rag==='green'?7:s.rag==='yellow'?5:4;
+  const badges=[];const bp=[...BADGES_ALL];for(let i=0;i<earned&&bp.length;i++){badges.push(bp.splice(Math.floor(rng()*bp.length),1)[0]);}
+  if(s.rag==='red'&&!badges.includes('Reached Out'))badges[badges.length-1]='Reached Out';
+  const chapters=CHAPTERS.map((c,i)=>{const baseP=s.rag==='green'?85:s.rag==='yellow'?55:35;return{name:c,pct:Math.max(10,Math.min(100,Math.round(baseP-i*18+rng()*12)))};});
+  const startV=months[0].v,nowV=months[N-1].v;
+  const prog=nowV-startV>0.5?'improved':nowV-startV<-0.5?'declined':'steady';
+  const leaves=mems.filter(m=>m.type==='leaf').length,flowers=mems.filter(m=>m.type==='flower').length;
+  return {months,mems,roots,badges,chapters,startV,nowV,startBand:bandOf(startV),nowBand:bandOf(nowV),prog,leaves,flowers,seed:s.id};
+}
+
+function expandStudent(s){
+  const d=Object.assign({},s);
+  d.flag = s.rag==='red';
+  d.mood = MOODNAME[s.moods[s.moods.length-1]];
+  // timeline entries
+  const entries=[];
+  s.moods.forEach((m,i)=>entries.push({wk:WL[i],type:'mood',txt:'Checked in: '+cap(MOODNAME[m]),mood:MOODNAME[m]}));
+  s.worries.forEach(w=>entries.push({wk:w.raised,type:'worry',txt:w.worry,mood:'low'}));
+  if(s.rag!=='red'&&s.card.okay.length)entries.push({wk:'3 weeks ago',type:'win',txt:s.card.okay[0],mood:'good'});
+  entries.push({wk:'This week',type:'note',txt:s.note,mood:d.mood});
+  d.entries=entries;
+  // access log
+  const log=[{who:'You',what:'Started your diary. Nobody else can see it.',t:'6 weeks ago',crisis:false}];
+  if(s.approved)log.unshift({who:'You',what:'Released your My Say card for the '+s.review+' review.',t:'This week',crisis:false});
+  if(s.rag==='red'){
+    log.unshift({who:'Signal',what:'Noticed a low-mood pattern building over 3 weeks and asked '+s.person+' to check in within 24h. You\'re seeing this because it\'s never secret.',t:'1 week ago',crisis:true});
+    log.unshift({who:s.person,what:'Asked to check in with you. They see that you might need a chat — never your diary.',t:'1 week ago',crisis:true});
+  }
+  d.accessLog=log;
+  d.chat=[{who:'bot',txt:'Hi '+s.name.split(' ')[0]+'. This space is yours — the "Who\'s seen what" log proves it. Your next review is '+s.review+'. Want to add anything, or just leave it?'}];
+  d.memory=buildMemory(s);
+  return d;
+}
+const MASTER={id:'999',name:'Meera Kapoor',role:'master',age:47,dob:'12/09/1978',title:'Service Lead'};
+function buildAll(){
+  DATA={};ACCOUNTS=[];
+  COUNSELLORS.forEach(c=>ACCOUNTS.push({id:c.id,name:c.name,role:'counsellor',age:c.age,dob:c.dob}));
+  ACCOUNTS.push({id:MASTER.id,name:MASTER.name,role:'master',age:MASTER.age,dob:MASTER.dob});
+  STUDENTS.forEach(s=>{DATA[s.id]=expandStudent(s);ACCOUNTS.push({id:s.id,name:s.name,role:'child',age:s.age,dob:s.dob});});
+}
+function cName(id){const c=COUNSELLORS.find(x=>x.id===id);return c?c.name:'—';}
+function allStudents(){return STUDENTS.map(s=>DATA[s.id]);}
+function caseloadFor(){
+  if(S.role==='master'){let a=allStudents();if(S.counsellorFilter&&S.counsellorFilter!=='all')a=a.filter(d=>d.counsellorId===S.counsellorFilter);return a;}
+  return myCaseload();
+}
+function canOpen(id){return S.role==='master'||myCaseload().some(d=>d.id===id);}
+
+/* ---------------- themes (per user, default teal) ---------------- */
+const THEMES={
+  teal:  {name:'Calm Teal',   dot:'#0f5f66', v:{'brand':'#0f5f66','brand-2':'#13808a','bg':'#e9f2f1','accent':'#e0715a','accent-soft':'#fbe6e0'}},
+  indigo:{name:'Trust Indigo', dot:'#2a4a7f', v:{'brand':'#2a4a7f','brand-2':'#365f9e','bg':'#eef1f7','accent':'#e8a13a','accent-soft':'#fdf0d9'}},
+  warm:  {name:'Warm Care',    dot:'#6e3b52', v:{'brand':'#6e3b52','brand-2':'#8a4c68','bg':'#f5efea','accent':'#e39b7b','accent-soft':'#fbe9df'}},
+  sage:  {name:'Fresh Sage',   dot:'#4f7a63', v:{'brand':'#4f7a63','brand-2':'#63977b','bg':'#eef2ec','accent':'#c9744b','accent-soft':'#f7e6db'}},
+};
+function applyTheme(key){const t=THEMES[key]||THEMES.teal;
+  Object.entries(t.v).forEach(([k,v])=>document.documentElement.style.setProperty('--'+k,v));}
+function loadPref(id){try{return localStorage.getItem('mysay-theme-'+id);}catch(e){return null;}}
+function savePref(id,key){try{localStorage.setItem('mysay-theme-'+id,key);}catch(e){}}
+function setTheme(key){S.theme=key;applyTheme(key);if(S.userId)savePref(S.userId,key);renderThemeSwitcher();}
+function renderThemeSwitcher(){
+  const box=document.getElementById('themebox');if(!box)return;
+  if(!S.loggedIn){box.innerHTML='';return;}
+  box.innerHTML=`<span class="themeswitch"><span class="tl2">Theme:</span>`+
+    Object.keys(THEMES).map(k=>`<button class="swatch${S.theme===k?' on':''}" title="${THEMES[k].name}" style="background:${THEMES[k].dot}" onclick="setTheme('${k}')"></button>`).join('')+`</span>`;
+}
+
+/* ---------------- session / routing ---------------- */
+function freshSession(){return{loggedIn:false,role:null,userId:null,name:null,view:null,textStep:0,loginErr:'',ragFilter:'all',counsellorFilter:'all',profileId:null,profileBack:null,theme:'teal'};}
+function cur(){return DATA[S.userId];}
+function myCaseload(){return STUDENTS.filter(s=>s.counsellorId===S.userId).map(s=>DATA[s.id]);}
+function login(id,dob){
+  const a=ACCOUNTS.find(x=>x.id===String(id).trim()&&x.dob===String(dob).trim());
+  if(!a){S.loginErr='ID and date of birth don\'t match an account. Try again, or use a demo login below.';render();return;}
+  S.loggedIn=true;S.role=a.role;S.userId=a.id;S.name=a.name;S.loginErr='';S.ragFilter='all';S.counsellorFilter='all';
+  S.theme=loadPref(a.id)||'teal';applyTheme(S.theme);
+  S.view=a.role==='child'?'yp':'overview';renderChrome();render();
+}
+function quickLogin(id){const a=ACCOUNTS.find(x=>x.id===id);login(a.id,a.dob);}
+function logout(){S=freshSession();applyTheme('teal');buildAll();renderChrome();render();}
+function setView(v){S.view=v;S.ragFilter='all';renderChrome();render();window.scrollTo(0,0);}
+function setFilter(r){S.ragFilter=r;render();}
+function setCounsellorFilter(cid){S.counsellorFilter=cid;S.ragFilter='all';S.view='overview';renderChrome();render();window.scrollTo(0,0);}
+function openProfile(id){
+  if(!canOpen(id))return;
+  DATA[id].accessLog.unshift({who:S.name+(S.role==='master'?' (service lead)':' (counsellor)'),
+    what:'Opened your profile to prepare for your review — logged here for you.',t:'just now',crisis:false});
+  S.profileBack=S.view;S.profileId=id;S.view='profile';renderChrome();render();window.scrollTo(0,0);
+}
+function backFromProfile(){S.view=S.profileBack||'overview';renderChrome();render();window.scrollTo(0,0);}
+
+/* ---------------- accessibility ---------------- */
+function cycleText(){const z=[16,18,20,22];S.textStep=(S.textStep+1)%z.length;document.documentElement.style.setProperty('--fs',z[S.textStep]+'px');}
+function toggleClass(cls,id){const on=document.body.classList.toggle(cls);document.getElementById(id).classList.toggle('on',on);}
+let reading=false;
+function readAloud(btn){
+  if(!('speechSynthesis'in window)){btn.textContent='Not supported';return;}
+  if(reading){speechSynthesis.cancel();reading=false;btn.classList.remove('on');btn.textContent='Read aloud';return;}
+  const txt=document.getElementById('view').innerText.replace(/\s+/g,' ').slice(0,3000);
+  const u=new SpeechSynthesisUtterance(txt);u.rate=.98;
+  u.onend=()=>{reading=false;btn.classList.remove('on');btn.textContent='Read aloud';};
+  speechSynthesis.speak(u);reading=true;btn.classList.add('on');btn.textContent='◼ Stop';
+}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function now(){const d=new Date();return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
+function initials(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+
+/* ---------------- chrome ---------------- */
+function renderChrome(){
+  const ub=document.getElementById('userbox'),tb=document.getElementById('tabbar');
+  renderThemeSwitcher();
+  if(!S.loggedIn){ub.innerHTML='';tb.innerHTML='';return;}
+  const roleLabel=S.role==='child'?'Young person · ID '+S.userId:S.role==='master'?'Service Lead · ID '+S.userId+' · all caseloads':'Counsellor · ID '+S.userId;
+  ub.innerHTML=`<div class="uavatar">${initials(S.name)}</div>
+    <div><div class="uname">${esc(S.name)}</div><div class="urole">${roleLabel}</div></div>
+    <button class="logout" onclick="logout()">Log out</button>`;
+  let tabs = S.role==='child'
+    ? [['yp','My diary','Signal — taps, voice or typing, never nagged'],['story','My Story ✦ big picture','Your journey over time, and what happened to what you said'],['tree','Memory Tree ✦','Your years remembered — leaves, flowers and roots']]
+    : S.role==='master'
+    ? [['overview','Service overview','Every child across all counsellors — RAG, flags, trends'],['journeys','Journeys','Progression of every child over the last year'],['team','Counsellors & effort','Each counsellor\'s caseload, flags and response'],['staff','All case detail','Approved cards and outcomes, service-wide']]
+    : [['overview','Wellbeing overview','RAG status, flags and trends across your caseload'],['journeys','Journeys','How your young people have progressed over the year'],['staff','Case detail','Approved cards, pattern flags, outcomes — never raw diaries']];
+  tb.innerHTML=`<div class="tabs">`+tabs.map(t=>`<button class="tab${S.view===t[0]?' on':''}" onclick="setView('${t[0]}')"><h3>${t[1]}</h3><p>${t[2]}</p></button>`).join('')+`</div>`;
+}
+
+/* ---------------- render router ---------------- */
+function render(){
+  const el=document.getElementById('view');
+  if(!S.loggedIn){el.innerHTML=renderLogin();return;}
+  if(S.role==='child'){el.innerHTML=S.view==='tree'?renderTree(cur()):S.view==='story'?renderStory(cur()):renderYP(cur());return;}
+  if(S.view==='profile')el.innerHTML=renderProfile(DATA[S.profileId]);
+  else if(S.view==='journeys')el.innerHTML=renderJourneys();
+  else if(S.view==='team')el.innerHTML=renderTeam();
+  else if(S.view==='staff')el.innerHTML=renderStaff();
+  else el.innerHTML=renderOverview();
+}
+
+/* ---------------- login ---------------- */
+function renderLogin(){
+  const demos=[ACCOUNTS.find(a=>a.role==='master'),ACCOUNTS.find(a=>a.role==='counsellor'),ACCOUNTS.find(a=>a.role==='child')];
+  return `<div class="loginwrap">
+    <div class="logintop"><div class="lb">MySay <small>· Signal</small></div>
+      <p>Sign in with your account ID and date of birth.</p></div>
+    <div class="panel">
+      ${S.loginErr?`<div class="lerr">${esc(S.loginErr)}</div>`:''}
+      <div class="lfield"><label>Account ID</label><input id="lid" placeholder="e.g. 123" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="lfield"><label>Date of birth (dd/mm/yyyy)</label><input id="ldob" placeholder="dd/mm/yyyy" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="lbtn" onclick="doLogin()">Sign in</button>
+      <div class="quick"><div class="qh">Quick demo logins (full list is in the Excel sheet)</div>
+        ${demos.map(a=>`<button class="qcard" onclick="quickLogin('${a.id}')">
+          <div class="uavatar">${initials(a.name)}</div>
+          <div><div class="qn">${esc(a.name)}</div><div class="qm">Age ${a.age} · DOB ${a.dob} · ID ${a.id}</div></div>
+          <span class="qtag ${a.role==='child'?'child':a.role==='master'?'master':'staff'}">${a.role==='child'?'Young person':a.role==='master'?'Service Lead':'Counsellor'}</span></button>`).join('')}
+      </div>
+    </div>
+    <p class="hint" style="text-align:center">Prototype login · dummy data only · nothing is stored.</p>
+  </div>`;
+}
+function doLogin(){login(document.getElementById('lid').value,document.getElementById('ldob').value);}
+
+/* ---------------- young person view ---------------- */
+function renderYP(d){
+  const status=d.approved?'released':(d.card.worry||d.card.decision||d.card.okay.length?'in progress':'not started');
+  const msgs=d.chat.map(m=>`<div class="bubble ${m.who==='bot'?'bot':'me'}">${esc(m.txt)}<span class="t">${now()}</span></div>`).join('');
+  const okayTxt=d.card.okay.length?d.card.okay.join(' · '):'';
+  return `<div class="grid2">
+    <div class="panel chat">
+      <h2 class="plain">Signal</h2><p class="sub">Tap answers, talk with the mic, or type — whatever's easiest.</p>
+      <div class="statusbar">📅 Next review: ${esc(d.review)} · card status: ${status} · your person: ${esc(d.person)}</div>
+      <div class="msgs" id="msgs">${msgs}</div>
+      <div class="chips">
+        <button class="chip" onclick="quick('going okay')">Something going okay</button>
+        <button class="chip" onclick="quick('worry')">A worry</button>
+        <button class="chip" onclick="quick('decision')">A decision I want a say in</button>
+        <button class="chip" onclick="quick('rather not')">Rather not say</button></div>
+      <div class="composer">
+        <input id="chatin" placeholder="Or type here if you'd rather…" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="mic" title="Voice (simulated)" onclick="micDemo()">🎙️</button>
+        <button class="send" onclick="sendChat()">Send</button></div>
+      <p class="hint" style="margin-top:8px">Mic is optional — taps and typing work just as well. Simulated in this prototype.</p>
+    </div>
+    <div>
+      <div class="panel"><h2 class="plain">Quick check-in</h2><p class="sub">How are you feeling right now?</p>
+        <div class="moods">${[['good','😄','Good'],['okay','🙂','Okay'],['low','😐','Low'],['bad','😞','Bad']].map(m=>
+          `<button class="mood${d.mood===m[0]?' sel':''}" onclick="setMood('${m[0]}')"><span class="e">${m[1]}</span>${m[2]}</button>`).join('')}</div>
+        <p class="hint" style="margin-top:10px"><b style="color:var(--brand)">Who sees this?</b> Only you — unless a worrying pattern builds, and then only your chosen person is asked to check in. Your words stay private.</p></div>
+      <div class="panel"><h2 class="plain">My Say card</h2><p class="sub">For your review on ${esc(d.review)} — you edit it, you release it.</p>
+        <div class="fieldlabel">3 things going okay</div><div class="field ${okayTxt?'':'empty'}">${okayTxt?esc(okayTxt):'Fills in as you tap and talk…'}</div>
+        <div class="fieldlabel">1 thing worrying me</div><div class="field ${d.card.worry?'':'empty'}">${d.card.worry?esc(d.card.worry):'…'}</div>
+        <div class="fieldlabel">1 decision I want a say in</div><div class="field ${d.card.decision?'':'empty'}">${d.card.decision?esc(d.card.decision):'…'}</div>
+        ${d.approved?`<div class="appcard" style="margin-top:14px;background:var(--green-soft);border-color:#c9e6d6"><b style="color:var(--green)">✓ Released for your review.</b> The IRO reads this first, before the adults talk.</div>`
+          :`<button class="cta green" style="margin-top:14px" onclick="approveCard()">Approve for my review</button><p class="hint" style="margin-top:8px">Not shared. Only you can see this draft.</p>`}</div>
+      <div class="panel"><h2 class="plain">Who's seen what</h2><p class="sub">Every access, logged for you — not for them.</p>
+        <div class="loglist">${d.accessLog.map(l=>`<div class="logitem${l.crisis?' crisis':''}"><b>${esc(l.who)}</b> — ${esc(l.what)}<div class="t">${esc(l.t)}</div></div>`).join('')}</div></div>
+    </div></div>`;
+}
+function setMood(m){const d=cur();d.mood=m;d.entries.unshift({wk:'This week',type:'mood',txt:'Checked in: '+cap(m),mood:m});d.moods.push({good:4,okay:3,low:2,bad:1}[m]);render();scrollMsgs();}
+function approveCard(){const d=cur();d.approved=true;d.accessLog.unshift({who:'You',what:'Released your My Say card for the '+d.review+' review.',t:'just now',crisis:false});render();}
+function quick(kind){const map={'going okay':'Something\'s going okay: ','worry':'A worry: ','decision':'I want a say in: ','rather not':'Rather not say'};
+  if(kind==='rather not'){pushBot('That\'s completely fine. It\'s here when you want it — no pressure, no reminders.');return;}
+  pushBot('Tell me a bit — tap the mic or just type. Whatever you say, you approve before anyone sees it.');
+  const inp=document.getElementById('chatin');inp.placeholder=map[kind]+'…';inp.focus();S._pending=kind;}
+function micDemo(){const s=['Match went well. Still worried about moving.','Getting on with my carer better this week.','Don\'t know who\'ll be in the room at my review.'];document.getElementById('chatin').value=s[Math.floor(Math.random()*s.length)];}
+function sendChat(){const inp=document.getElementById('chatin');const v=inp.value.trim();if(!v)return;pushMe(v);inp.value='';inp.placeholder="Or type here if you'd rather…";route(v);}
+function pushMe(t){cur().chat.push({who:'me',txt:t});render();scrollMsgs();}
+function pushBot(t){cur().chat.push({who:'bot',txt:t});render();scrollMsgs();}
+function scrollMsgs(){const m=document.getElementById('msgs');if(m)m.scrollTop=m.scrollHeight;}
+function route(v){const d=cur();const low=v.toLowerCase();
+  const worryW=['worri','worry','scared','afraid','move','moved','anxious','sad','alone','don\'t know','dont know','hate','stress','low','money','bills'];
+  const okayW=['okay','good','went well','football','tutor','carer','friend','proud','happy','better','part of','gym','sorted'];
+  const decW=['want a say','staying','school','decide','decision','choose','stay at','say in','contact','visit'];
+  const isW=worryW.some(w=>low.includes(w))||S._pending==='worry';
+  const isD=decW.some(w=>low.includes(w))||S._pending==='decision';
+  const isO=okayW.some(w=>low.includes(w))||S._pending==='going okay';
+  let placed=false;
+  if(S._pending==='worry'||(isW&&!S._pending)){d.card.worry=v;placed='worry';d.entries.unshift({wk:'This week',type:'worry',txt:v,mood:d.mood||'okay'});d.worries.unshift({worry:v,raised:'just now',status:'raised',outcome:null,days:null});}
+  else if(S._pending==='decision'||(isD&&!S._pending)){d.card.decision=v;placed='decision';d.entries.unshift({wk:'This week',type:'note',txt:'Want a say in: '+v,mood:d.mood||'okay'});}
+  else if(S._pending==='going okay'||isO){if(d.card.okay.length<3)d.card.okay.push(v);placed='okay';d.entries.unshift({wk:'This week',type:'win',txt:v,mood:'good'});}
+  else if(isW){d.card.worry=v;placed='worry';d.entries.unshift({wk:'This week',type:'worry',txt:v,mood:d.mood||'okay'});d.worries.unshift({worry:v,raised:'just now',status:'raised',outcome:null,days:null});}
+  S._pending=null;
+  setTimeout(()=>{
+    if(placed==='worry')pushBot('That sounds heavy — and saying it counts. It\'s gone into your card as your worry. Anything going okay right now, even a small thing?');
+    else if(placed==='decision')pushBot('Good — that\'s on your card as a decision you want a say in. The IRO gets it in writing before the meeting. Anything worrying you?');
+    else if(placed==='okay'){const n=d.card.okay.length;pushBot(n<3?`Nice one — that\'s ${n} of 3 good things. What else is going okay?`:'That\'s your 3 good things. Anything worrying you, or a decision you want a say in?');}
+    else pushBot('Got it — noted. Want that on your card as a good thing, a worry, or a decision? Tap a chip above.');
+  },250);
+}
+
+/* ---------------- My Story ---------------- */
+function moodSeries(d){return d.moods.map((v,i)=>({w:WL[i]||'This week',v}));}
+function renderStory(d){
+  const groups={};d.entries.forEach(e=>{(groups[e.wk]=groups[e.wk]||[]).push(e);});
+  const order=WL.concat(['This week']);const weeks=order.filter(w=>groups[w]);Object.keys(groups).forEach(w=>{if(!weeks.includes(w))weeks.push(w);});
+  const seq=moodSeries(d);
+  let h=`<div class="storyhead"><h2>My Story so far</h2>
+    <p>Everything you've said, in order — and what happened next. This is yours: at 18 it all leaves with you, every word. No streaks, no nudges. Come back when <i>you</i> want.</p>
+    <span class="covenant">✦ Your words open your reviews — this is the proof they went somewhere</span></div>`;
+  if(seq.length>=2)h+=`<div class="panel"><h2 class="plain">How the weeks have felt</h2><p class="sub">Your own check-ins over time — nobody else's read of you.</p>${moodChart(seq)}</div>`;
+  if(d.worries.length){h+=`<div class="panel"><h2 class="plain">What happened to what I said</h2><p class="sub">Every worry you raised, tracked from your words to a real outcome — so you can see you were heard.</p>`;
+    d.worries.forEach(w=>h+=loopCard(w));h+=`</div>`;}
+  h+=`<div class="panel"><h2 class="plain">The whole thread</h2><p class="sub">Wins, worries and check-ins in order.</p><div class="tl">`;
+  weeks.forEach(w=>{h+=`<div class="tlweek">${esc(w)}</div>`;groups[w].slice().reverse().forEach(e=>{
+    const cls=e.type==='win'?'win':e.type==='worry'?'worry':e.type==='mood'?'moodm':'note';const tag=e.type==='win'?'win':e.type==='worry'?'worry':e.type==='mood'?'mood':'note';
+    h+=`<div class="tlitem ${cls}"><div class="txt"><span class="tag ${tag}">${tag}</span>${esc(e.txt)}</div></div>`;});});
+  h+=`</div></div>
+  <div class="panel" style="background:#f7fbfa;text-align:center"><b style="color:var(--brand)">At 18, this whole story is yours to keep.</b>
+    <p class="hint" style="margin:6px auto 0;max-width:460px">Every entry, your voice, your outcomes — exported and deleted from the service if you want.</p>
+    <button class="chip" style="margin-top:12px" onclick="alert('In the live app this exports your full story and wipes it from the service on request. Simulated here.')">⭳ Download my story</button></div>`;
+  return h;
+}
+function moodChart(seq){const W=640,H=120,pad=24,n=seq.length,x=i=>pad+i*(W-2*pad)/Math.max(1,n-1),y=v=>H-pad-((v-1)/3)*(H-2*pad);
+  const pts=seq.map((s,i)=>`${x(i).toFixed(1)},${y(s.v).toFixed(1)}`).join(' ');
+  const dots=seq.map((s,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(s.v).toFixed(1)}" r="4.5" fill="var(--accent)"/>`).join('');
+  const labs=seq.map((s,i)=>`<text x="${x(i).toFixed(1)}" y="${H-6}" font-size="9" fill="#5e7377" text-anchor="middle">${s.w.replace(' ago','').replace('weeks','wk').replace('week','wk')}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;overflow:visible"><line x1="${pad}" y1="${y(3).toFixed(1)}" x2="${W-pad}" y2="${y(3).toFixed(1)}" stroke="#d8e6e4"/>
+    <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labs}
+    <text x="2" y="${y(4)+3}" font-size="9" fill="#5e7377">Good</text><text x="2" y="${y(1)+3}" font-size="9" fill="#5e7377">Bad</text></svg>`;
+}
+function loopCard(w){const steps=[['raised','Raised','You said it, in your words'],['discussed','On the agenda','IRO has it before the meeting'],['outcome','Outcome','A real decision came back to you']];
+  const idx={raised:0,discussed:1,outcome:2}[w.status];
+  const stepsHtml=steps.map((s,i)=>`<div class="step ${i<idx?'done':i===idx?'active':''}"><div class="dot"></div><div class="stitle">${s[1]}</div><div class="sdesc">${s[2]}</div></div>`).join('');
+  const outcome=w.outcome?`<div style="margin-top:8px;font-size:13.5px">${esc(w.outcome)}</div>`:'';
+  const resp=w.status==='outcome'?`<span class="resptime">⏱ Heard in ${w.days} days · used to take weeks</span>`:w.status==='discussed'?`<span class="resptime open">⏱ In progress — days, not months</span>`:`<span class="resptime open">⏱ Just raised</span>`;
+  const fill=idx===0?0:idx===1?50:100;
+  return `<div class="loop"><div class="lworry">${esc(w.worry)}</div><div class="hint" style="font-size:12px">Raised ${esc(w.raised)}</div>
+    <div class="steps">${stepsHtml}</div><div class="steptrack"><div class="fill" style="width:${fill}%"></div></div>${outcome}${resp}</div>`;
+}
+
+/* ---------------- counsellor overview ---------------- */
+const RAGLABEL={red:'Needs urgent help',yellow:'Needs monitoring',green:'Doing well'};
+const RAGCOLOR={red:'var(--red)',yellow:'var(--amber)',green:'var(--green)'};
+function trendDir(seq){if(seq.length<2)return{sym:'→',cls:'',word:'steady'};const diff=seq[seq.length-1].v-seq[0].v;
+  return diff>=0.5?{sym:'▲',cls:'up',word:'improving'}:diff<=-0.5?{sym:'▼',cls:'down',word:'declining'}:{sym:'→',cls:'',word:'steady'};}
+function sparkline(seq,color){const W=150,H=40,n=seq.length,x=i=>2+i*(W-4)/Math.max(1,n-1),y=v=>H-4-((v-1)/3)*(H-8);
+  const pts=seq.map((s,i)=>`${x(i).toFixed(1)},${y(s.v).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:150px;height:40px"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
+function ragStackBar(counts,total){const W=640,H=34;let x=0;let segs='';
+  [['red',counts.red],['yellow',counts.yellow],['green',counts.green]].forEach(([k,n])=>{const w=total? n/total*W:0;
+    if(w>0){segs+=`<rect x="${x.toFixed(1)}" y="0" width="${w.toFixed(1)}" height="${H}" fill="${RAGCOLOR[k]}"/>`;
+      if(w>28)segs+=`<text x="${(x+w/2).toFixed(1)}" y="${H/2+4}" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">${n}</text>`;x+=w;}});
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:34px;border-radius:8px;overflow:hidden">${segs}</svg>`;}
+function caseloadBars(list){const W=660,H=150,pad=22,n=list.length,bw=(W-2*pad)/n*0.62,gap=(W-2*pad)/n;
+  let bars='';list.forEach((d,i)=>{const v=d.moods[d.moods.length-1];const bx=pad+i*gap+(gap-bw)/2;const bh=((v-1)/3)*(H-40)+6;const by=H-24-bh;
+    bars+=`<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="3" fill="${RAGCOLOR[d.rag]}"><title>${esc(d.name)} — ${cap(MOODNAME[v])}</title></rect>
+      <text x="${(bx+bw/2).toFixed(1)}" y="${H-10}" font-size="8.5" fill="#5e7377" text-anchor="middle">${esc(d.name.split(' ')[0])}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><line x1="${pad}" y1="${H-24}" x2="${W-pad}" y2="${H-24}" stroke="#d8e6e4"/>${bars}</svg>`;}
+function avgTrend(list){const seqs=list.map(d=>d.moods);const wk=Math.max(...seqs.map(s=>s.length));const avg=[];
+  for(let i=0;i<wk;i++){let sum=0,c=0;seqs.forEach(s=>{if(s[i]!=null){sum+=s[i];c++;}});avg.push(sum/c);}
+  const W=640,H=130,pad=26,n=avg.length,x=i=>pad+i*(W-2*pad)/Math.max(1,n-1),y=v=>H-pad-((v-1)/3)*(H-2*pad);
+  const pts=avg.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const dots=avg.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="4" fill="var(--brand)"/>`).join('');
+  const labs=WL.concat(['This week']).slice(0,n).map((w,i)=>`<text x="${x(i).toFixed(1)}" y="${H-6}" font-size="9" fill="#5e7377" text-anchor="middle">${w.replace(' ago','').replace('weeks','wk').replace('week','wk')}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><line x1="${pad}" y1="${y(3).toFixed(1)}" x2="${W-pad}" y2="${y(3).toFixed(1)}" stroke="#d8e6e4" stroke-dasharray="3"/>
+    <polyline points="${pts}" fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labs}
+    <text x="2" y="${y(4)+3}" font-size="9" fill="#5e7377">Good</text><text x="2" y="${y(1)+3}" font-size="9" fill="#5e7377">Bad</text></svg>`;
+}
+function renderOverview(){
+  const master=S.role==='master';
+  const list=caseloadFor();
+  const counts={red:0,yellow:0,green:0};list.forEach(d=>counts[d.rag]++);
+  const cardsReady=list.filter(d=>d.approved).length;
+  const openW=list.reduce((n,d)=>n+d.worries.filter(w=>w.status!=='outcome').length,0);
+  const scopeLabel=master?(S.counsellorFilter==='all'?'across all '+COUNSELLORS.length+' counsellors':'in '+cName(S.counsellorFilter)+'’s caseload'):'on your caseload';
+  let h=`<div class="storyhead"><h2>${master?'Service overview':'Wellbeing overview'}</h2>
+    <p>${master?'Every young person '+scopeLabel+', ':'Your caseload at a glance, '}${esc(S.name)}. Banded Red / Yellow / Green from consented pattern signals and approved cards — never raw diaries. Tap any young person to open their profile. Reds need action within 24 hours.</p>
+    <span class="covenant">You see patterns, flags and approved cards · every access is logged for the young person</span></div>`;
+  if(master){
+    h+=`<div class="panel" style="padding:14px 18px"><div class="filterbar" style="margin:0"><span class="tl2" style="align-self:center;margin-right:4px">Counsellor:</span>
+      <button class="chip${S.counsellorFilter==='all'?' on':''}" onclick="setCounsellorFilter('all')">All · ${allStudents().length}</button>
+      ${COUNSELLORS.map(c=>`<button class="chip${S.counsellorFilter===c.id?' on':''}" onclick="setCounsellorFilter('${c.id}')">${esc(c.name.split(' ')[0])} · ${STUDENTS.filter(s=>s.counsellorId===c.id).length}</button>`).join('')}
+    </div></div>`;
+  }
+  h+=`<div class="kpis">
+    <div class="kpi"><div class="big">${list.length}</div><div class="lab">${master&&S.counsellorFilter==='all'?'All young people':'On this caseload'}</div></div>
+    <div class="kpi red"><div class="big">${counts.red}</div><div class="lab">Red · urgent help</div></div>
+    <div class="kpi yellow"><div class="big">${counts.yellow}</div><div class="lab">Yellow · monitor</div></div>
+    <div class="kpi green"><div class="big">${counts.green}</div><div class="lab">Green · doing well</div></div>
+    <div class="kpi"><div class="big">${openW}</div><div class="lab">Open worries tracked</div></div>
+    <div class="kpi"><div class="big">${cardsReady}/${list.length}</div><div class="lab">Cards ready</div></div>
+  </div>`;
+  // rag bar + trend side by side
+  h+=`<div class="two">
+    <div class="panel"><h2 class="plain">Caseload status (RAG)</h2><p class="sub">Distribution across your ${list.length} young people.</p>
+      ${ragStackBar(counts,list.length)}
+      <div class="legend"><span><i class="sw red"></i> ${RAGLABEL.red} — ${counts.red}</span><span><i class="sw yellow"></i> ${RAGLABEL.yellow} — ${counts.yellow}</span><span><i class="sw green"></i> ${RAGLABEL.green} — ${counts.green}</span></div></div>
+    <div class="panel"><h2 class="plain">Average mood trend</h2><p class="sub">Whole-caseload signal over the last 6 weeks.</p>${avgTrend(list)}</div>
+  </div>`;
+  // urgent
+  const reds=list.filter(d=>d.rag==='red');
+  h+=`<div class="panel"><h2 class="plain">🚨 Needs help now — Red</h2><p class="sub">Flagged by a low, declining pattern. Duty: review within 24h; ${reds.length?'act via each young person\'s chosen adult.':'nothing urgent right now.'}</p>`;
+  if(!reds.length)h+=`<p class="hint" style="margin-top:8px">No red flags on your caseload today.</p>`;
+  reds.forEach(d=>{const seq=moodSeries(d);const top=d.worries.find(w=>w.status!=='outcome');
+    h+=`<div class="urgent clickable" onclick="openProfile('${d.id}')"><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="background:var(--red-soft);color:var(--red)">${initials(d.name)}</div>
+      <div style="flex:1"><div class="un">${esc(d.name)} · age ${d.age} · ID ${d.id}${master?' · '+esc(cName(d.counsellorId).split(' ')[0]):''}</div>
+      <div class="ur">Low mood building over 3 weeks (now ${cap(d.mood)}). Top worry: ${esc(top?top.worry:'—')}</div></div>
+      ${sparkline(seq,'var(--red)')}</div>
+      <div class="uact">⏱ Action within 24h · escalation: ${esc(d.person)} (their choice) · open profile →</div></div>`;});
+  h+=`</div>`;
+  // wellbeing bars
+  h+=`<div class="panel"><h2 class="plain">Where everyone is right now</h2><p class="sub">Latest check-in per young person, coloured by band.</p>${caseloadBars(list)}</div>`;
+  // filter + cards
+  h+=`<div class="panel"><h2 class="plain">All young people</h2>
+    <div class="filterbar">${[['all','All'],['red','Red'],['yellow','Yellow'],['green','Green']].map(f=>`<button class="chip${S.ragFilter===f[0]?' on':''}" onclick="setFilter('${f[0]}')">${f[1]}${f[0]!=='all'?' · '+counts[f[0]]:''}</button>`).join('')}</div>
+    <div class="healthgrid">`;
+  const shown=list.filter(d=>S.ragFilter==='all'||d.rag===S.ragFilter);
+  shown.sort((a,b)=>({red:0,yellow:1,green:2}[a.rag]-{red:0,yellow:1,green:2}[b.rag]));
+  shown.forEach(d=>{const seq=moodSeries(d);const tr=trendDir(seq);const top=d.worries.find(w=>w.status!=='outcome');
+    h+=`<div class="hcard ${d.rag} clickable" onclick="openProfile('${d.id}')"><div class="khead"><div class="avatar">${initials(d.name)}</div>
+      <div style="flex:1"><div class="kname">${esc(d.name)}</div><div class="kmeta">Age ${d.age} · ID ${d.id}${master?' · '+esc(cName(d.counsellorId).split(' ')[0]):''}</div></div>
+      <span class="badge ${d.rag}">${RAGLABEL[d.rag]}</span></div>
+      <div class="curmood">${MOODEMO[d.mood]} ${cap(d.mood)} · trend <b style="color:${tr.cls==='down'?'var(--red)':tr.cls==='up'?'var(--green)':'var(--muted)'}">${tr.sym} ${tr.word}</b></div>
+      ${sparkline(seq,RAGCOLOR[d.rag])}
+      <div class="hrow2"><span class="k">Top worry</span><span class="v">${top?esc(top.worry):'None open'}</span></div>
+      <div class="hrow2"><span class="k">Next review</span><span class="v">${esc(d.review)} · ${d.approved?'card ✓':'no card'}</span></div>
+      <div class="hrow2"><span class="k">Person</span><span class="v">${esc(d.person)}</span></div>
+      <div class="viewlink">View profile &amp; recent entries →</div>
+    </div>`;});
+  h+=`</div></div>`;
+  return h;
+}
+
+/* ---------------- counsellor case detail ---------------- */
+function renderStaff(){
+  const list=caseloadFor();
+  let h=`<div class="staffbar"><b>You see:</b> pattern flags + cards each young person approved. <b>You never see:</b> raw diaries. <b>They see you:</b> every access appears in their own log.<br>
+    <b>Duty:</b> flags reviewed within 24h, 7 days a week. Named lead: <b>J. Okafor, Safeguarding</b>.<br>
+    <b>Reasonable-judgement policy:</b> a flag reviewed and closed in good faith is institutionally backed. Escalate on evidence, not for cover.</div>`;
+  h+=`<div class="panel"><h2 class="plain">Outcomes — the numbers commissioners are sold on</h2><p class="sub">Five metrics from the investment case, live off consented, approved data.</p>
+    <div class="metrics" style="margin-top:12px">
+      <div class="metric"><div class="big">78%</div><div class="lab">Reviews preceded by a card</div><div class="tr">▲ ≥70%</div></div>
+      <div class="metric"><div class="big">84%</div><div class="lab">Card items addressed</div><div class="tr">▲ ≥80%</div></div>
+      <div class="metric"><div class="big">+31%</div><div class="lab">"Felt heard" 1→2</div><div class="tr">▲ rising</div></div>
+      <div class="metric"><div class="big">9 days</div><div class="lab">Worry-to-response</div><div class="tr">▼ faster</div></div>
+      <div class="metric"><div class="big">0</div><div class="lab">Placement breakdowns</div><div class="tr">vs 2 baseline</div></div>
+    </div></div>`;
+  h+=`<div class="panel"><h2 class="plain">Adoption — reported honestly</h2>
+    <div class="metrics" style="grid-template-columns:repeat(4,1fr);margin-top:12px">
+      ${[[list.length,'invited'],[list.filter(d=>d.mood!=='bad').length,'active this week'],['2','dropped off'],['1','never started']].map(a=>`<div class="metric"><div class="big">${a[0]}</div><div class="lab">${a[1]}</div></div>`).join('')}</div>
+    <p class="hint" style="margin-top:8px">Drop-offs followed up offline via trusted adults — never nagged through the app. Silence is data.</p></div>`;
+  h+=`<div class="healthgrid">`;
+  const master=S.role==='master';
+  list.slice().sort((a,b)=>({red:0,yellow:1,green:2}[a.rag]-{red:0,yellow:1,green:2}[b.rag])).forEach(d=>{
+    const bars=d.moods;const max=Math.max(...bars,4);const respW=d.worries.find(w=>w.days);
+    h+=`<div class="hcard ${d.rag} clickable" onclick="openProfile('${d.id}')"><div class="khead"><div class="avatar">${initials(d.name)}</div>
+      <div style="flex:1"><div class="kname">${esc(d.name)}</div><div class="kmeta">Age ${d.age} · ID ${d.id}${master?' · '+esc(cName(d.counsellorId).split(' ')[0]):''}</div></div>
+      <span class="badge ${d.rag}">${RAGLABEL[d.rag]}</span></div>
+      <div class="bars">${bars.map(b=>`<span style="height:${(b/max*30+4).toFixed(0)}px;background:${RAGCOLOR[d.rag]}"></span>`).join('')}</div>
+      <div style="font-size:12.5px">${d.rag==='red'?'Pattern flag: low-mood signals building across 3 weeks (frequency + tone). Not one comment — a build-up.':d.rag==='yellow'?'Mixed signals — some good weeks, some dips. Worth monitoring, no flag yet.':'Steady, positive tone. First card read out at review.'}</div>
+      <div class="appcard"><b>Approved My Say card</b><br>Going okay: ${esc(d.card.okay.join(' · '))}<br>Worry: ${esc(d.card.worry)}<br>Wants a say in: ${esc(d.card.decision)}</div>
+      <div class="esc">Escalation: ${esc(d.person)} (their choice)</div>
+      <div class="flagline"><span class="fdot ${d.rag==='red'?'red':d.rag==='green'?'ok':''}"></span>${d.rag==='red'?'Flag raised · review due within 24h':'No open flags'} ${respW?'· worry-to-response: '+respW.days+' days':''}</div>
+      <div class="viewlink">Open full profile →</div>
+    </div>`;});
+  h+=`</div>`;
+  return h;
+}
+
+/* ---------------- child profile (counsellor / master) ---------------- */
+function renderProfile(d){
+  const seq=moodSeries(d);const tr=trendDir(seq);
+  const recent=d.entries.slice().reverse().slice(0,12);
+  let h=`<button class="backbtn" onclick="backFromProfile()">← Back to ${S.profileBack==='team'?'counsellors':S.profileBack==='staff'?'case detail':'overview'}</button>`;
+  h+=`<div class="storyhead" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div class="uavatar" style="width:56px;height:56px;font-size:20px;background:rgba(255,255,255,.18)">${initials(d.name)}</div>
+    <div style="flex:1;min-width:220px"><h2 style="margin:0">${esc(d.name)}</h2>
+      <p style="margin:4px 0 0">Age ${d.age} · ID ${d.id} · assigned to ${esc(cName(d.counsellorId))} · person: ${esc(d.person)}</p></div>
+    <div style="text-align:right"><span class="badge ${d.rag}" style="font-size:12px">${RAGLABEL[d.rag]}</span>
+      <div style="margin-top:6px;font-size:14px">${MOODEMO[d.mood]} ${cap(d.mood)} · <b>${tr.sym} ${tr.word}</b></div></div></div>`;
+  h+=`<div class="panel" style="background:var(--accent-soft);border-color:#eecfc6">
+    <b>Consent notice.</b> You're viewing an approved profile. Opening it has just been logged in ${esc(d.name.split(' ')[0])}'s own "Who's seen what". You see approved cards, pattern signals and outcomes — never unreleased diary text.</div>`;
+  h+=`<div class="two">
+    <div class="panel"><h2 class="plain">Mood trend (6 weeks)</h2>${moodChart(seq)}</div>
+    <div class="panel"><h2 class="plain">Approved My Say card</h2><p class="sub">Next review: ${esc(d.review)} · ${d.approved?'card released ✓':'no card yet'}</p>
+      <div class="fieldlabel">3 things going okay</div><div class="field">${esc(d.card.okay.join(' · '))}</div>
+      <div class="fieldlabel">1 thing worrying me</div><div class="field">${esc(d.card.worry)}</div>
+      <div class="fieldlabel">1 decision I want a say in</div><div class="field">${esc(d.card.decision)}</div></div></div>`;
+  // long-term journey
+  const m=d.memory;const bandLab={green:'Doing well',yellow:'Finding footing',red:'Needs support'};
+  const arrow=m.prog==='improved'?'▲':m.prog==='declined'?'▼':'→';
+  h+=`<div class="panel"><h2 class="plain">Journey over the last year</h2>
+    <p class="sub">16-month emotion river and progression — the history behind today's band. <span class="progpill ${m.prog}">${cap(m.prog)}</span>
+      <span style="margin-left:8px">${bandLab[m.startBand]} <b>${arrow}</b> ${bandLab[m.nowBand]}</span></p>
+    ${emotionRiver(m.months,'prv'+d.id)}
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:10px">
+      <div style="flex:1;min-width:200px"><div class="fieldlabel">Milestones reached (${m.badges.length})</div>
+        <div class="badges">${m.badges.map(b=>`<span class="mbadge">🏅 ${esc(b)}</span>`).join('')}</div></div>
+      <div style="flex:1;min-width:200px"><div class="fieldlabel">Life chapters</div>
+        ${m.chapters.map(c=>`<div class="chap"><div class="cl"><b>${esc(c.name)}</b><span class="hint">${c.pct}%</span></div><div class="cbar"><div class="cf" style="width:${c.pct}%"></div></div></div>`).join('')}</div>
+    </div>
+    <p class="hint" style="margin-top:6px">🍃 ${m.leaves} reflections · 🌸 ${m.flowers} achievements · roots: ${m.roots.map(esc).join(', ')}</p></div>`;
+  if(d.worries.length){h+=`<div class="panel"><h2 class="plain">Worries tracked to outcome</h2><p class="sub">From ${esc(d.name.split(' ')[0])}'s words to a real decision.</p>`;
+    d.worries.forEach(w=>h+=loopCard(w));h+=`</div>`;}
+  h+=`<div class="panel"><h2 class="plain">Last entries in the system</h2><p class="sub">Most recent activity — check-ins, wins and worries.</p><div class="tl">`;
+  recent.forEach(e=>{const cls=e.type==='win'?'win':e.type==='worry'?'worry':e.type==='mood'?'moodm':'note';const tag=e.type==='win'?'win':e.type==='worry'?'worry':e.type==='mood'?'mood':'note';
+    h+=`<div class="tlitem ${cls}"><div class="txt"><span class="tag ${tag}">${tag}</span>${esc(e.txt)}</div><div class="meta" style="font-size:11.5px;color:var(--muted);margin-top:1px">${esc(e.wk)}</div></div>`;});
+  h+=`</div></div>`;
+  h+=`<div class="panel"><h2 class="plain">Who's seen what</h2><p class="sub">The same log ${esc(d.name.split(' ')[0])} sees — including your visit just now.</p>
+    <div class="loglist">${d.accessLog.map(l=>`<div class="logitem${l.crisis?' crisis':''}"><b>${esc(l.who)}</b> — ${esc(l.what)}<div class="t">${esc(l.t)}</div></div>`).join('')}</div></div>`;
+  return h;
+}
+
+/* ---------------- master: counsellors & effort ---------------- */
+function counsellorStats(cid){
+  const cs=STUDENTS.filter(s=>s.counsellorId===cid).map(s=>DATA[s.id]);
+  const c={red:0,yellow:0,green:0};cs.forEach(d=>c[d.rag]++);
+  const ready=cs.filter(d=>d.approved).length;
+  const openW=cs.reduce((n,d)=>n+d.worries.filter(w=>w.status!=='outcome').length,0);
+  const daysArr=cs.flatMap(d=>d.worries.filter(w=>w.days).map(w=>w.days));
+  const avgResp=daysArr.length?Math.round(daysArr.reduce((a,b)=>a+b,0)/daysArr.length):8;
+  const active=cs.filter(d=>d.mood!=='bad').length;
+  return {cs,c,ready,openW,avgResp,active,size:cs.length,flags:c.red};
+}
+function renderTeam(){
+  const total=allStudents().length;const reds=allStudents().filter(d=>d.rag==='red').length;
+  const allReady=allStudents().filter(d=>d.approved).length;
+  let h=`<div class="storyhead"><h2>Counsellors &amp; effort</h2>
+    <p>Service-wide view, ${esc(S.name)}. Every counsellor's caseload, wellbeing mix, open flags and responsiveness — so you can balance load and spot where support is needed. Tap a counsellor to open their caseload; tap any child to open their profile.</p>
+    <span class="covenant">Master oversight · all ${COUNSELLORS.length} counsellors · ${total} young people</span></div>`;
+  h+=`<div class="kpis">
+    <div class="kpi"><div class="big">${COUNSELLORS.length}</div><div class="lab">Counsellors</div></div>
+    <div class="kpi"><div class="big">${total}</div><div class="lab">Young people</div></div>
+    <div class="kpi red"><div class="big">${reds}</div><div class="lab">Red flags open</div></div>
+    <div class="kpi"><div class="big">${allReady}/${total}</div><div class="lab">Cards ready</div></div>
+    <div class="kpi"><div class="big">${(reds/COUNSELLORS.length).toFixed(1)}</div><div class="lab">Avg reds / counsellor</div></div>
+    <div class="kpi"><div class="big">${Math.round(allReady/total*100)}%</div><div class="lab">Service card coverage</div></div>
+  </div>`;
+  h+=`<div class="healthgrid">`;
+  COUNSELLORS.forEach(c=>{const st=counsellorStats(c.id);
+    h+=`<div class="hcard clickable" style="border-top-color:var(--brand)" onclick="setCounsellorFilter('${c.id}')">
+      <div class="khead"><div class="avatar">${initials(c.name)}</div>
+        <div style="flex:1"><div class="kname">${esc(c.name)}</div><div class="kmeta">Counsellor · ID ${c.id} · ${st.size} young people</div></div>
+        ${st.flags?`<span class="badge red">${st.flags} red</span>`:`<span class="badge green">all steady</span>`}</div>
+      ${ragStackBar(st.c,st.size)}
+      <div class="legend" style="margin:8px 0 4px;font-size:12px"><span><i class="sw red"></i>${st.c.red}</span><span><i class="sw yellow"></i>${st.c.yellow}</span><span><i class="sw green"></i>${st.c.green}</span></div>
+      <div class="hrow2"><span class="k">Cards ready</span><span class="v">${st.ready}/${st.size}</span></div>
+      <div class="hrow2"><span class="k">Open worries tracked</span><span class="v">${st.openW}</span></div>
+      <div class="hrow2"><span class="k">Avg worry-to-response</span><span class="v">${st.avgResp} days</span></div>
+      <div class="hrow2"><span class="k">Active this week</span><span class="v">${st.active}/${st.size}</span></div>
+      <div class="viewlink">View caseload →</div>
+    </div>`;});
+  h+=`</div>`;
+  return h;
+}
+
+/* ---------------- memory tree SVGs ---------------- */
+function emotionRiver(months,gid){
+  const W=680,H=180,pad=30,n=months.length,x=i=>pad+i*(W-2*pad)/Math.max(1,n-1),y=v=>H-26-((v-1)/3)*(H-56);
+  const line=months.map((m,i)=>`${x(i).toFixed(1)},${y(m.v).toFixed(1)}`).join(' ');
+  const area=`${pad},${H-26} `+line+` ${W-pad},${H-26}`;
+  const bandColor={green:'var(--green)',yellow:'var(--amber)',red:'var(--red)'};
+  const dots=months.map((m,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(m.v).toFixed(1)}" r="3.5" fill="${bandColor[bandOf(m.v)]}"/>`).join('');
+  const labs=months.map((m,i)=>i%3===0||i===n-1?`<text x="${x(i).toFixed(1)}" y="${H-8}" font-size="9" fill="#5e7377" text-anchor="middle">${m.label}</text>`:'').join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><defs>
+      <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--green)" stop-opacity="0.35"/>
+        <stop offset="55%" stop-color="var(--amber)" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="var(--red)" stop-opacity="0.12"/></linearGradient></defs>
+    <polygon points="${area}" fill="url(#${gid})"/>
+    <polyline points="${line}" fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dots}${labs}
+    <text x="4" y="${y(4)+3}" font-size="9" fill="#5e7377">Calm</text>
+    <text x="4" y="${y(1)+3}" font-size="9" fill="#5e7377">Storm</text></svg>`;
+}
+function riverMini(months,gid){
+  const W=170,H=46,n=months.length,x=i=>2+i*(W-4)/Math.max(1,n-1),y=v=>H-4-((v-1)/3)*(H-10);
+  const line=months.map((m,i)=>`${x(i).toFixed(1)},${y(m.v).toFixed(1)}`).join(' ');
+  const area=`2,${H-4} `+line+` ${W-2},${H-4}`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:170px;height:46px"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="var(--green)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--red)" stop-opacity="0.1"/></linearGradient></defs>
+    <polygon points="${area}" fill="url(#${gid})"/><polyline points="${line}" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function memoryTree(m){
+  const rng=seededRng(m.seed+'tree');const W=720,H=460;
+  const cx=360,cyTop=170,rx=190,ry=130;
+  let leaves='';for(let i=0;i<m.leaves;i++){const a=rng()*Math.PI*2,r=Math.sqrt(rng())*0.95;
+    const lx=cx+Math.cos(a)*rx*r,ly=cyTop+Math.sin(a)*ry*r;leaves+=`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${(4+rng()*3).toFixed(1)}" fill="var(--green)" opacity="${(0.55+rng()*0.4).toFixed(2)}"/>`;}
+  let flowers='';for(let i=0;i<m.flowers;i++){const a=rng()*Math.PI*2,r=Math.sqrt(rng())*0.9;
+    const fx=cx+Math.cos(a)*rx*r,fy=cyTop+Math.sin(a)*ry*r;
+    flowers+=`<g transform="translate(${fx.toFixed(1)},${fy.toFixed(1)})">${[0,72,144,216,288].map(d=>`<circle cx="${(Math.cos(d*Math.PI/180)*5).toFixed(1)}" cy="${(Math.sin(d*Math.PI/180)*5).toFixed(1)}" r="3.2" fill="var(--accent)"/>`).join('')}<circle r="2.6" fill="#ffd76a"/></g>`;}
+  // roots
+  const groundY=352;let roots='',rootLabels='';const rn=m.roots.length;
+  m.roots.forEach((rt,i)=>{const spread=(i-(rn-1)/2);const ex=cx+spread*150;const ey=430;
+    roots+=`<path d="M${cx} ${groundY} Q ${cx+spread*40} ${groundY+40} ${ex} ${ey}" fill="none" stroke="#9a7a54" stroke-width="${(6-Math.abs(spread)).toFixed(1)}" stroke-linecap="round" opacity="0.85"/>`;
+    rootLabels+=`<text x="${ex.toFixed(0)}" y="${ey+16}" font-size="11" fill="#7a5a3c" text-anchor="middle" font-weight="600">${esc(rt)}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-height:460px">
+    <ellipse cx="${cx}" cy="${cyTop}" rx="${rx}" ry="${ry}" fill="#e0f0e0"/>
+    <ellipse cx="${cx}" cy="${cyTop}" rx="${rx-40}" ry="${ry-30}" fill="#d3ead4"/>
+    <rect x="${cx-16}" y="${cyTop+60}" width="32" height="150" rx="8" fill="#8a6a48"/>
+    <path d="M${cx-16} ${cyTop+120} q -34 -6 -54 -34" fill="none" stroke="#8a6a48" stroke-width="12" stroke-linecap="round"/>
+    <path d="M${cx+16} ${cyTop+110} q 34 -6 56 -30" fill="none" stroke="#8a6a48" stroke-width="12" stroke-linecap="round"/>
+    ${leaves}${flowers}
+    <line x1="70" y1="${groundY}" x2="${W-70}" y2="${groundY}" stroke="#cdbfa8" stroke-dasharray="4"/>
+    ${roots}${rootLabels}</svg>`;
+}
+
+/* ---------------- child: Memory Tree ---------------- */
+function renderTree(d){
+  const m=d.memory;const yrNow="2026",yrPrev="2025";
+  const byYear={};m.mems.forEach(x=>{const yr=x.month.includes("'25")?yrPrev:yrNow;(byYear[yr]=byYear[yr]||[]).push(x);});
+  const ic={leaf:'🍃',flower:'🌸',note:'🕊️'};
+  let h=`<div class="storyhead"><h2>My Memory Tree</h2>
+    <p>Everything you've shared, growing into something that's yours. Your reflections are the leaves, the things you're proud of are the flowers, and the people in your corner are the roots. It grows a little every time — no pressure, no streaks.</p>
+    <span class="covenant">🍃 ${m.leaves} reflections · 🌸 ${m.flowers} achievements · 🌱 ${m.roots.length} people in your roots</span></div>`;
+  h+=`<div class="panel"><div class="mtree">${memoryTree(m)}</div></div>`;
+  h+=`<div class="panel"><h2 class="plain">My Emotion River</h2><p class="sub">How the months have flowed — calm, storms and coming back through. This is your read of you, not anyone else's.</p>
+    ${emotionRiver(m.months,'rvr'+m.seed)}
+    <div class="riverleg"><span><i class="sw green"></i> Calm months</span><span><i class="sw yellow"></i> Finding my way back</span><span><i class="sw red"></i> Stormier weeks</span></div></div>`;
+  h+=`<div class="two">
+    <div class="panel"><h2 class="plain">My chapters</h2><p class="sub">The story so far — every chapter counts.</p>
+      ${m.chapters.map(c=>`<div class="chap"><div class="cl"><b>${esc(c.name)}</b><span class="hint">${c.pct}%</span></div><div class="cbar"><div class="cf" style="width:${c.pct}%"></div></div></div>`).join('')}</div>
+    <div class="panel"><h2 class="plain">Badges I've earned</h2><p class="sub">For showing up — not for streaks.</p>
+      <div class="badges">${m.badges.map(b=>`<span class="mbadge">🏅 ${esc(b)}</span>`).join('')}</div></div></div>`;
+  h+=`<div class="panel"><h2 class="plain">My memories</h2><p class="sub">What you posted, kept for you — at 18 it all leaves with you.</p>`;
+  [yrNow,yrPrev].forEach(yr=>{if(!byYear[yr])return;h+=`<div class="memyear">${yr}</div><div class="memlist">`;
+    byYear[yr].forEach(x=>{h+=`<div class="memitem"><div class="memicon ${x.type}">${ic[x.type]}</div><div><div>${esc(x.text)}</div><div class="hint" style="font-size:11.5px">${esc(x.month)}</div></div></div>`;});
+    h+=`</div>`;});
+  h+=`<button class="chip" style="margin-top:12px" onclick="alert('In the live app this exports your whole tree and river as a keepsake you own — and wipes it from the service on request. Simulated here.')">⭳ Keep my tree</button></div>`;
+  return h;
+}
+
+/* ---------------- counsellor/master: Journeys over time ---------------- */
+function renderJourneys(){
+  const master=S.role==='master';const list=caseloadFor();
+  const prog={improved:0,steady:0,declined:0};list.forEach(d=>prog[d.memory.prog]++);
+  const scope=master?(S.counsellorFilter==='all'?'across all counsellors':'in '+cName(S.counsellorFilter)+'’s caseload'):'on your caseload';
+  let h=`<div class="storyhead"><h2>Journeys over time</h2>
+    <p>How the young people ${scope} have progressed over the last year, ${esc(S.name)} — not a snapshot, a trajectory. Built from consented pattern signals and approved milestones. Tap anyone to open their full journey.</p>
+    <span class="covenant">Long-term view · 16 months · every child's history in one place</span></div>`;
+  if(master){h+=`<div class="panel" style="padding:14px 18px"><div class="filterbar" style="margin:0"><span class="tl2" style="align-self:center;margin-right:4px">Counsellor:</span>
+    <button class="chip${S.counsellorFilter==='all'?' on':''}" onclick="setCounsellorFilter('all');setView('journeys')">All · ${allStudents().length}</button>
+    ${COUNSELLORS.map(c=>`<button class="chip${S.counsellorFilter===c.id?' on':''}" onclick="setCounsellorFilter('${c.id}');setView('journeys')">${esc(c.name.split(' ')[0])} · ${STUDENTS.filter(s=>s.counsellorId===c.id).length}</button>`).join('')}
+  </div></div>`;}
+  h+=`<div class="kpis" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi green"><div class="big">${prog.improved}</div><div class="lab">Improved over the year</div></div>
+    <div class="kpi yellow"><div class="big">${prog.steady}</div><div class="lab">Holding steady</div></div>
+    <div class="kpi red"><div class="big">${prog.declined}</div><div class="lab">Declining — watch closely</div></div>
+    <div class="kpi"><div class="big">${list.reduce((n,d)=>n+d.memory.badges.length,0)}</div><div class="lab">Milestones earned</div></div>
+  </div>`;
+  h+=`<div class="panel"><h2 class="plain">Every young person's trajectory</h2><p class="sub">Emotion river over 16 months · start band → where they are now.</p>`;
+  const bandLab={green:'Doing well',yellow:'Finding footing',red:'Needs support'};
+  list.slice().sort((a,b)=>({declined:0,steady:1,improved:2}[a.memory.prog]-{declined:0,steady:1,improved:2}[b.memory.prog])).forEach(d=>{
+    const m=d.memory;const arrow=m.prog==='improved'?'▲':m.prog==='declined'?'▼':'→';
+    h+=`<div class="journeyrow clickable" onclick="openProfile('${d.id}')">
+      <div class="avatar">${initials(d.name)}</div>
+      <div style="flex:1;min-width:150px"><div class="kname" style="font-size:14.5px">${esc(d.name)}</div>
+        <div class="kmeta">Age ${d.age} · ID ${d.id}${master?' · '+esc(cName(d.counsellorId).split(' ')[0]):''} · 🏅 ${m.badges.length} milestones</div></div>
+      ${riverMini(m.months,'jm'+d.id)}
+      <div style="text-align:right;min-width:150px">
+        <span class="badge ${m.startBand}">${bandLab[m.startBand]}</span> <b style="color:var(--muted)">${arrow}</b> <span class="badge ${m.nowBand}">${bandLab[m.nowBand]}</span>
+        <div class="progpill ${m.prog}" style="margin-top:6px">${cap(m.prog)}</div></div>
+    </div>`;});
+  h+=`</div>`;
+  return h;
+}
+
+/* ---------------- boot ---------------- */
+S=freshSession();applyTheme('teal');buildAll();renderChrome();render();
+</script>
+</body>
+</html>
